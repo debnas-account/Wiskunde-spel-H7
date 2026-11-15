@@ -1,0 +1,1438 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Schampschot</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap">
+<style>
+/* Layout: tactisch scherm. Het veld (assenstelsel) links, het werkpaneel rechts; op telefoon gestapeld met het toetsenblok onderaan.
+   Eén donkere look, bewust: cirkels rood en lijnen blauw, net als in het boek. */
+:root {
+  color-scheme: dark;
+  --bg: #0E1B30; --panel: #1A2C46; --ink: #0A1424; --rule: #2B4366; --grid: #1B3050;
+  --fg: #F5F8FF; --dim: #9DB0CC; --cyan: #8FD3F0; --rasp: #E94B6B; --amber: #F2B84B; --coral: #FF8A7A; --mint: #7FE3B4;
+  --f-display: 'Chakra Petch', 'Arial Black', Arial, sans-serif;
+  --f-ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-math: 'STIX Two Text', 'Times New Roman', Times, serif;
+  --r: 10px;
+}
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html { height: 100%; }
+body {
+  margin: 0; height: 100%; background: var(--bg); color: var(--fg);
+  font: 400 16px/1.5 var(--f-ui);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+h1, h2 { font-family: var(--f-display); font-weight: 700; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.05rem; letter-spacing: .04em; text-transform: uppercase; color: var(--cyan); }
+p { margin: 0; }
+.app { max-width: 1080px; margin-inline: auto; min-height: 100%; display: flex; flex-direction: column; }
+body.fixed .app { height: 100%; }
+.screen { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 16px; padding-block: 20px 28px; }
+.eyebrow { font: 600 .75rem/1.2 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--amber); }
+
+/* wiskunde */
+var { font-family: var(--f-math); font-style: italic; }
+.given, .step, .log, .fb, .opt, .rule, .read, .sol, .rf-q { font-family: var(--f-math); }
+sup, sub { font-size: .7em; line-height: 0; }
+.fr { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: .72em; line-height: 1.08; margin: 0 .12em; }
+.fr > span { padding: 0 .18em; }
+.fr > span:first-child { border-bottom: 1px solid currentColor; }
+.fr.big { font-size: .88em; line-height: 1.3; }
+.fr.big > span:first-child { padding-bottom: .1em; }
+.rad { border-top: 1px solid currentColor; padding: 0 .12em 0 .06em; }
+.sqrt { white-space: nowrap; }
+
+/* knoppen */
+.btn { min-height: 46px; padding: 6px 12px; line-height: 1.15; text-align: center; border-radius: var(--r); font: 600 1rem var(--f-display); letter-spacing: .04em; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; }
+.btn.pri { background: var(--cyan); color: var(--ink); }
+.btn.pri.fire { background: var(--amber); }
+.btn.sec { border: 1.5px solid var(--rule); color: var(--fg); }
+.btn:active { transform: translateY(1px); }
+.ghost { min-width: 40px; height: 40px; padding: 0 10px; border-radius: 8px; color: var(--dim); font: 500 .85rem var(--f-ui); }
+.ghost:hover { color: var(--fg); background: var(--panel); }
+.link { color: var(--dim); font-size: .9rem; text-decoration: underline; text-underline-offset: 3px; padding: 8px 0; }
+.link:hover { color: var(--fg); }
+
+/* basis */
+.mast { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 20px; align-items: center; }
+.mast h1 { font-size: clamp(2.2rem, 9vw, 3.6rem); line-height: 1; letter-spacing: .02em; text-transform: uppercase; margin-block: 6px 12px; }
+.lead { color: var(--dim); max-width: 46ch; }
+.hero { width: 170px; height: 170px; border-radius: 50%; background: var(--ink); border: 1px solid var(--rule); }
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding: 12px 14px; background: var(--panel); border-radius: var(--r); font-size: .9rem; color: var(--dim); }
+.status b { font-family: var(--f-display); font-size: 1.05rem; color: var(--fg); letter-spacing: .04em; text-transform: uppercase; }
+.xpbar { flex: 1 1 140px; height: 6px; background: var(--ink); border-radius: 3px; overflow: hidden; }
+.xpbar i { display: block; height: 100%; background: var(--amber); border-radius: 3px; }
+.missions { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.mission { width: 100%; display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; background: var(--panel); border: 1.5px solid transparent; border-radius: var(--r); }
+.mission:hover { border-color: var(--rule); }
+.mission.next { border-color: var(--cyan); }
+.mission .code { font: 700 1.05rem var(--f-display); color: var(--cyan); letter-spacing: .04em; }
+.mission b { display: block; font: 600 1rem/1.25 var(--f-ui); }
+.mission small { display: block; color: var(--dim); font-size: .82rem; line-height: 1.3; }
+.mission .meta { text-align: right; display: grid; gap: 4px; justify-items: end; }
+.pips { display: inline-flex; gap: 5px; align-items: center; }
+.pips i { width: 9px; height: 9px; transform: rotate(45deg); border: 1.5px solid var(--rule); }
+.pips i.on { background: var(--amber); border-color: var(--amber); }
+.pips i.now { border-color: var(--cyan); }
+.extras { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); }
+.extras .mission .code { color: var(--amber); }
+.foot { display: flex; flex-wrap: wrap; gap: 4px 20px; margin-top: auto; padding-top: 8px; }
+
+/* briefing */
+.hud { display: flex; align-items: center; gap: 10px; min-height: 40px; }
+.hud-mid { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; font: 600 .85rem var(--f-display); letter-spacing: .06em; text-transform: uppercase; color: var(--dim); white-space: nowrap; }
+.hud-r { display: flex; align-items: center; gap: 10px; font: 600 .85rem var(--f-display); letter-spacing: .04em; white-space: nowrap; }
+#combo { color: var(--amber); }
+#hudXp.bump { animation: bump .35s ease-out; }
+@keyframes bump { 40% { transform: scale(1.25); color: var(--amber); } }
+.brief-grid { display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr); }
+.brief-txt { display: grid; gap: 14px; align-content: start; }
+.brief-txt h2 { font-size: 1.6rem; color: var(--fg); letter-spacing: .02em; }
+.prose { display: grid; gap: 10px; max-width: 60ch; }
+.prose p { color: var(--fg); }
+.prose ol { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; }
+.rule { background: var(--panel); border-radius: 8px; padding: 10px 14px; font-size: 1.1rem; line-height: 2; overflow-x: auto; }
+.rule small { font-family: var(--f-ui); color: var(--dim); font-size: .8rem; }
+.brief-demo { display: grid; gap: 8px; align-content: start; }
+.brief-demo .field { aspect-ratio: 1; max-width: 100%; max-height: 46vh; background: var(--ink); border: 1px solid var(--rule); border-radius: var(--r); }
+.read { min-height: 3.2em; font-size: 1.05rem; line-height: 1.6; color: var(--fg); }
+.read small { font-family: var(--f-ui); color: var(--amber); font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; display: block; }
+
+/* spelen */
+#play { gap: 8px; padding-block: 8px 12px; }
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.fieldbox { position: relative; flex: 0 0 auto; height: clamp(180px, 31vh, 360px); background: var(--ink); border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+.field { display: block; width: 100%; height: 100%; user-select: none; -webkit-user-select: none; }
+.field.live { cursor: crosshair; touch-action: none; }
+.verdict { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); padding: 4px 14px; border-radius: 6px; font: 700 .95rem var(--f-display); letter-spacing: .08em; text-transform: uppercase; background: var(--amber); color: var(--ink); white-space: nowrap; animation: pop .25s ease-out; }
+@keyframes pop { from { transform: translateX(-50%) scale(.7); opacity: 0; } }
+.panel { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; }
+.scroll { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 2px; }
+.given { font-size: 1.02rem; line-height: 1.5; color: var(--dim); }
+.given var { color: var(--fg); }
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: .98rem; line-height: 1.9; color: var(--dim); }
+.log li { padding-left: 20px; position: relative; }
+.log li::before { content: ''; position: absolute; left: 3px; top: .8em; width: 8px; height: 8px; transform: rotate(45deg); background: var(--mint); }
+.log li.miss::before { background: none; border: 1.5px solid var(--coral); }
+.log b, .sol b { font-weight: 400; color: var(--fg); }
+.step { font-size: 1.15rem; }
+.eq { line-height: 2.3; }
+.ask { line-height: 1.5; }
+.note { font: .85rem var(--f-ui); color: var(--dim); margin-top: 4px; }
+.done { font: 600 1rem var(--f-ui); color: var(--mint); }
+.slot { display: inline-flex; align-items: center; justify-content: center; min-width: 2.6em; height: 1.9em; padding: 0 .4em; margin: 0 .1em; vertical-align: middle; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--ink); font: 1em var(--f-math); color: var(--fg); }
+.slot.on { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(242, 184, 75, .22); }
+.slot.on::after { content: ''; width: 1.5px; height: 1.1em; margin-left: 1px; background: var(--amber); animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.slot.shown { border-color: var(--coral); color: var(--coral); }
+.slot.shake { animation: shake .3s; }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.fb { padding: 10px 12px; border-radius: 8px; background: var(--panel); border-left: 3px solid var(--amber); font-size: 1rem; line-height: 1.9; overflow-x: auto; }
+.fb .fbt { display: block; font: 600 .72rem/1.4 var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); }
+.fb.uitleg { border-color: var(--coral); }
+.fb.uitleg .fbt { color: var(--coral); }
+.fb.note { border-color: var(--cyan); font-family: var(--f-ui); font-size: .9rem; line-height: 1.5; }
+.fb.note .fbt { display: none; }
+.choices { display: grid; gap: 6px; }
+.opt { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: center; text-align: left; min-height: 46px; padding: 6px 12px; border: 1.5px solid var(--rule); border-radius: 8px; background: var(--panel); font-size: 1.05rem; line-height: 1.7; overflow-x: auto; }
+.opt .k { font: 600 .75rem var(--f-ui); color: var(--dim); width: 22px; height: 22px; border: 1px solid var(--rule); border-radius: 4px; display: grid; place-items: center; }
+.opt:hover:not(:disabled) { border-color: var(--cyan); }
+.opt.right { border-color: var(--mint); background: rgba(127, 227, 180, .12); }
+.opt.wrong { border-color: var(--coral); opacity: .55; }
+.opt:disabled { cursor: default; }
+.pad { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.pad button { height: 42px; border-radius: 8px; background: var(--panel); font: 500 1.2rem var(--f-math); }
+.pad button:active { background: var(--rule); }
+.pad .fn { color: var(--cyan); }
+.actions { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 8px; }
+.actions:has(.btn[hidden]) { grid-template-columns: minmax(0, 1fr); }
+
+/* veld (svg) */
+.grid line { stroke: var(--grid); stroke-width: 1; }
+.axes line { stroke: var(--dim); stroke-width: 1.2; }
+.axes path { fill: var(--dim); }
+.ticks text { fill: var(--dim); font: 10px var(--f-ui); }
+.ticks .it { font: italic 13px var(--f-math); }
+.circ { fill: var(--rasp); fill-opacity: .1; stroke: var(--rasp); stroke-width: 2; }
+.ln { stroke: var(--cyan); stroke-width: 2; }
+.seg { stroke: var(--cyan); stroke-width: 1.5; stroke-dasharray: 5 4; }
+.pt { fill: var(--fg); }
+.pt.drag { fill: var(--amber); stroke: var(--ink); stroke-width: 2; }
+.lab { font: italic 15px var(--f-math); fill: var(--fg); paint-order: stroke; stroke: var(--ink); stroke-width: 3px; }
+.lab.lc { fill: var(--rasp); }
+.lab.ll { fill: var(--cyan); }
+.sq { fill: none; stroke: var(--fg); stroke-width: 1; }
+.marker circle { fill: none; stroke: var(--amber); stroke-width: 2; }
+.marker path { stroke: var(--amber); stroke-width: 1.5; }
+.beam { stroke: var(--amber); stroke-width: 3; stroke-linecap: round; }
+.beam.st-snijdt, .beam.st-mist { stroke: var(--coral); stroke-dasharray: 2 6; }
+.beam.fly { stroke-dasharray: 1; stroke-dashoffset: 1; animation: fly .5s ease-out forwards; }
+@keyframes fly { to { stroke-dashoffset: 0; } }
+.spark line { stroke: var(--amber); stroke-width: 2; stroke-linecap: round; }
+.spark { animation: spark .7s ease-out forwards; }
+@keyframes spark { from { transform: scale(.2); opacity: 1; } to { transform: scale(1.7); opacity: 0; } }
+.hitdot { fill: var(--coral); animation: blink .4s steps(2) 3; }
+
+/* resultaat */
+#result { justify-content: center; align-items: center; }
+.result-card { width: min(100%, 460px); display: grid; gap: 16px; padding: 24px 20px; background: var(--panel); border-radius: 14px; }
+.result-card h2 { font-size: 1.7rem; color: var(--fg); letter-spacing: .02em; }
+.result-card .pips i { width: 18px; height: 18px; border-width: 2px; margin: 4px; }
+.facts { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.facts div { background: var(--ink); border-radius: 8px; padding: 10px; min-width: 0; }
+.facts div:nth-child(3) { grid-column: 1 / -1; }
+.facts dd { overflow-wrap: anywhere; }
+.facts dt { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+.facts dd { margin: 0; font: 700 1.3rem var(--f-display); font-variant-numeric: tabular-nums; }
+.result-card .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.result-card .sub { color: var(--dim); font-size: .92rem; }
+
+/* reflextest */
+.timebar { flex: 1; height: 8px; background: var(--ink); border-radius: 4px; overflow: hidden; }
+.timebar i { display: block; height: 100%; background: var(--amber); transform-origin: left; }
+.score { font: 700 1.3rem var(--f-display); min-width: 2ch; text-align: right; font-variant-numeric: tabular-nums; }
+.rf-body { width: min(100%, 560px); margin-inline: auto; display: grid; gap: 14px; align-content: start; padding-top: 4vh; }
+.rf-q { font-size: 1.3rem; line-height: 1.9; min-height: 3.8em; }
+.rf-combo { min-height: 1.5em; font: 600 .85rem var(--f-display); letter-spacing: .08em; text-transform: uppercase; color: var(--amber); }
+
+/* overlay */
+.overlay { position: fixed; inset: 0; z-index: 20; background: rgba(6, 12, 24, .8); display: grid; place-items: end center; padding: env(safe-area-inset-top, 0px) 0 0; }
+.sheet-card { width: min(100%, 640px); max-height: 88%; overflow-y: auto; background: var(--bg); border: 1px solid var(--rule); border-radius: 14px 14px 0 0; padding: 16px max(16px, env(safe-area-inset-right, 0px)) calc(24px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 12px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; position: sticky; top: -16px; background: var(--bg); padding-block: 8px; }
+.sheet-card h3 { font: 600 .78rem var(--f-ui); letter-spacing: .1em; text-transform: uppercase; color: var(--amber); margin: 8px 0 0; }
+.sol { margin: 0; padding-left: 1.3em; display: grid; gap: 12px; font-size: 1.02rem; line-height: 1.9; color: var(--dim); }
+.sol .why { color: var(--fg); padding: 6px 10px; background: var(--panel); border-radius: 8px; overflow-x: auto; }
+
+@media (min-width: 860px) {
+  .mast { grid-template-columns: minmax(0, 1fr) 220px; }
+  .hero { width: 220px; height: 220px; }
+  .brief-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 420px); align-items: start; }
+  #play { padding-block: 12px 16px; }
+  .stage { flex-direction: row; gap: 20px; }
+  .fieldbox { flex: 1 1 0; height: auto; min-width: 0; }
+  .panel { flex: 0 0 400px; }
+  #field .lab { font-size: 19px; }
+  #field .ticks text { font-size: 12px; }
+  #field .ticks .it { font-size: 16px; }
+  .overlay { place-items: center; }
+  .sheet-card { border-radius: 14px; }
+}
+@media (max-width: 480px) {
+  .mast { grid-template-columns: minmax(0, 1fr); }
+  .hero { display: none; }
+  .mission { grid-template-columns: 38px minmax(0, 1fr); }
+  .mission .meta { grid-column: 2; justify-items: start; text-align: left; grid-auto-flow: column; justify-content: start; gap: 10px; align-items: center; }
+  .hud-r #openSheet { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001s !important; animation-iteration-count: 1 !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <section id="home" class="screen">
+    <header class="mast">
+      <div>
+        <p class="eyebrow">Wiskunde B · hoofdstuk 7.4</p>
+        <h1>Schampschot</h1>
+        <p class="lead">Elke cirkel is een schild. Een voltreffer ketst af. Alleen een lijn die de cirkel precies raakt schakelt het uit. Reken die lijn uit en vuur.</p>
+      </div>
+      <svg id="hero" class="hero" aria-hidden="true"></svg>
+    </header>
+    <div class="status" id="status"></div>
+    <h2>Missies</h2>
+    <ol class="missions" id="missions"></ol>
+    <h2>Extra</h2>
+    <div class="extras" id="extras"></div>
+    <footer class="foot">
+      <button type="button" id="sheetBtn" class="link">Spiekbrief</button>
+      <button type="button" id="soundBtn" class="link"></button>
+      <button type="button" id="resetBtn" class="link">Voortgang wissen</button>
+    </footer>
+  </section>
+
+  <section id="brief" class="screen" hidden>
+    <div class="hud"><button type="button" class="ghost" data-home>← Basis</button></div>
+    <div class="brief-grid">
+      <div class="brief-txt">
+        <p class="eyebrow" id="briefCode"></p>
+        <h2 id="briefTitle"></h2>
+        <div id="briefBody" class="prose"></div>
+        <button type="button" id="briefStart" class="btn pri">Start missie</button>
+      </div>
+      <div class="brief-demo" id="briefDemo">
+        <svg id="demo" class="field" role="img" aria-label="Proefveld"></svg>
+        <p id="demoRead" class="read"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="hud">
+      <button type="button" id="quit" class="ghost" aria-label="Stoppen">✕</button>
+      <div class="hud-mid"><span id="hudCode"></span><span id="pips" class="pips"></span></div>
+      <div class="hud-r"><span id="combo"></span><span id="hudXp"></span><button type="button" id="openSheet" class="ghost">Spiekbrief</button></div>
+    </div>
+    <div class="stage">
+      <div class="fieldbox">
+        <svg id="field" class="field" role="img" aria-label="Assenstelsel met de opgave"></svg>
+        <div id="verdict" class="verdict" hidden></div>
+      </div>
+      <div class="panel">
+        <div class="scroll" id="scroll">
+          <p id="given" class="given"></p>
+          <ol id="log" class="log"></ol>
+          <div id="step" class="step"></div>
+          <div id="fb" class="fb" hidden></div>
+        </div>
+        <div id="choices" class="choices" hidden></div>
+        <div id="pad" class="pad" hidden></div>
+        <div class="actions">
+          <button type="button" id="hintBtn" class="btn sec">Hint</button>
+          <button type="button" id="go" class="btn pri">Check</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="result-card" id="resultCard"></div>
+  </section>
+
+  <section id="reflex" class="screen" hidden>
+    <div class="hud">
+      <button type="button" class="ghost" data-home aria-label="Stoppen">✕</button>
+      <div class="timebar"><i id="timeFill"></i></div>
+      <span id="rfScore" class="score">0</span>
+    </div>
+    <div class="rf-body">
+      <p id="rfQ" class="rf-q"></p>
+      <div id="rfOpts" class="choices"></div>
+      <p id="rfCombo" class="rf-combo"></p>
+    </div>
+  </section>
+
+  <div id="sheet" class="overlay" hidden>
+    <div class="sheet-card" role="dialog" aria-labelledby="sheetTitle">
+      <div class="sheet-head"><h2 id="sheetTitle">Spiekbrief</h2><button type="button" id="sheetClose" class="ghost" aria-label="Sluiten">✕</button></div>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+</div>
+<script>
+'use strict';
+/* Schampschot: rekenkern. Breuken, opmaak, invoerparser en opgavengeneratoren.
+   Geen DOM hier, zodat alles in node te testen is (zie test/math.test.js). */
+
+/* ---------- basis ---------- */
+const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const sgn = () => (Math.random() < 0.5 ? -1 : 1);
+const gcd = (a, b) => { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; };
+const isSq = n => Number.isInteger(n) && n >= 0 && Math.round(Math.sqrt(n)) ** 2 === n;
+
+class Q {
+  constructor(n, d = 1) { if (d < 0) { n = -n; d = -d; } const g = gcd(n, d); this.n = n / g; this.d = d / g; }
+  static of(x) { if (x instanceof Q) return x; if (Number.isInteger(x)) return new Q(x); return new Q(Math.round(x * 12), 12); }
+  add(o) { o = Q.of(o); return new Q(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o) { o = Q.of(o); return new Q(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o) { o = Q.of(o); return new Q(this.n * o.n, this.d * o.d); }
+  div(o) { o = Q.of(o); return new Q(this.n * o.d, this.d * o.n); }
+  neg() { return new Q(-this.n, this.d); }
+  abs() { return new Q(Math.abs(this.n), this.d); }
+  get v() { return this.n / this.d; }
+  isInt() { return this.d === 1; }
+}
+const q = (n, d = 1) => new Q(n, d);
+
+/* ---------- opmaak (HTML) ---------- */
+const V = s => `<var>${s}</var>`;
+const rc = s => `rc<sub>${V(s)}</sub>`;
+function fq(x) { // gemengde breuk zoals in het boek: −1⅓
+  x = Q.of(x); const neg = x.n < 0, n = Math.abs(x.n), d = x.d;
+  if (d === 1) return (neg ? '−' : '') + n;
+  const w = Math.floor(n / d), r = n % d;
+  return (neg ? '−' : '') + (w || '') + `<span class="fr"><span>${r}</span><span>${d}</span></span>`;
+}
+function fdec(x, dec) {
+  const v = x instanceof Q ? x.v : x;
+  const s = dec == null ? String(Math.round(v * 1000) / 1000) : v.toFixed(dec);
+  return s.replace('-', '−').replace('.', ',');
+}
+const pn = x => { x = Q.of(x); return x.n < 0 ? `(${fq(x)})` : fq(x); };
+const pp = x => { x = Q.of(x); return x.n < 0 || x.d !== 1 ? `(${fq(x)})` : fq(x); }; // ook breuken tussen haakjes
+function rt(x) {
+  x = Q.of(x);
+  if (x.d === 1 && isSq(x.n)) return String(Math.sqrt(x.n));
+  return `<span class="sqrt">√<span class="rad">${fq(x)}</span></span>`;
+}
+const root = inner => `<span class="sqrt">√<span class="rad">${inner}</span></span>`;
+const frac = (a, b) => `<span class="fr big"><span>${a}</span><span>${b}</span></span>`;
+function sq(v, c) { c = Q.of(c); if (c.n === 0) return `${V(v)}<sup>2</sup>`; return `(${V(v)} ${c.n < 0 ? '+' : '−'} ${fq(c.abs())})<sup>2</sup>`; }
+function vterm(c, v, first) {
+  c = Q.of(c); if (c.n === 0) return '';
+  const a = c.abs();
+  const body = ((a.n === 1 && a.d === 1 && v) ? '' : fq(a)) + (v ? V(v) : '');
+  return first ? (c.n < 0 ? '−' : '') + body : (c.n < 0 ? ' − ' : ' + ') + body;
+}
+const circEq = (M, r2) => `${sq('x', M[0])} + ${sq('y', M[1])} = ${fq(r2)}`;
+const circExp = (p, qq, s) => `${V('x')}<sup>2</sup> + ${V('y')}<sup>2</sup>${vterm(p, 'x')}${vterm(qq, 'y')}${vterm(s, '')} = 0`;
+function lineEq(a, b) { a = Q.of(a); b = Q.of(b); if (a.n === 0) return `${V('y')} = ${fq(b)}`; return `${V('y')} = ${vterm(a, 'x', true)}${vterm(b, '')}`; }
+const lineStd = (A, B, C) => `${vterm(A, 'x', true)}${vterm(B, 'y', Q.of(A).n === 0)} = ${fq(C)}`;
+const P = (name, p) => `${V(name)}(${fq(p[0])}, ${fq(p[1])})`;
+const dd = (a, b) => `${V('d')}(${a}, ${b})`;
+const distWork = (A, B) => root(`(${fq(A[0])} − ${pn(B[0])})<sup>2</sup> + (${fq(A[1])} − ${pn(B[1])})<sup>2</sup>`);
+function poly(A, B, C) { return `${vterm(A, 'a', true)}<sup>2</sup>${vterm(B, 'a')}${vterm(C, '')} = 0`; }
+
+/* ---------- invoer ---------- */
+function evalExpr(str) {
+  const s = String(str).replace(/\s/g, '').replace(/,/g, '.').replace(/−/g, '-').replace(/[·×]/g, '*');
+  if (!s) return NaN;
+  let i = 0;
+  const peek = () => s[i];
+  function expr() { let v = term(); while (peek() === '+' || peek() === '-') { const o = s[i++]; const t = term(); v = o === '+' ? v + t : v - t; } return v; }
+  function term() {
+    let v = factor();
+    for (;;) {
+      const c = peek();
+      if (c === '*' || c === '/') { i++; const f = factor(); v = c === '*' ? v * f : v / f; }
+      else if (c === '√' || c === '(') v *= factor();
+      else break;
+    }
+    return v;
+  }
+  function factor() {
+    const c = peek();
+    if (c === '-') { i++; return -factor(); }
+    if (c === '+') { i++; return factor(); }
+    if (c === '√') { i++; return Math.sqrt(factor()); }
+    if (c === '(') { i++; const v = expr(); if (peek() !== ')') throw 0; i++; return v; }
+    const m = /^\d+(\.\d+)?/.exec(s.slice(i));
+    if (!m) throw 0;
+    i += m[0].length; return parseFloat(m[0]);
+  }
+  try { const v = expr(); return i === s.length && isFinite(v) ? v : NaN; } catch (e) { return NaN; }
+}
+
+const close = (v, e, tol) => Math.abs(v - e) <= (tol || 1e-7 * Math.max(1, Math.abs(e)));
+function checkInput(step, vals) {
+  if (step.check) return step.check(vals);
+  const ex = step.slots.map(s => s.v);
+  const match = es => vals.every((v, i) => close(v, es[i], step.slots[i].tol));
+  if (match(ex)) return { ok: true };
+  if (step.unordered && match(ex.slice().reverse())) return { ok: true };
+  const nearTo = es => vals.every((v, i) => Math.abs(v - es[i]) < 0.011);
+  return { ok: false, near: nearTo(ex) || (!!step.unordered && nearTo(ex.slice().reverse())) };
+}
+
+/* ---------- lijnen en scenes ---------- */
+function twoPts(ln) { if (ln.x != null) return [[ln.x, 0], [ln.x, 1]]; if (ln.p) return [ln.p, ln.q]; return [[0, ln.b], [1, ln.a + ln.b]]; }
+function lineStatus(ln, target) { // ligging van lijn t.o.v. cirkel {M, r}
+  const [p, w] = twoPts(ln), dx = w[0] - p[0], dy = w[1] - p[1], L2 = dx * dx + dy * dy;
+  const mx = target.M[0] - p[0], my = target.M[1] - p[1];
+  const t = (mx * dx + my * dy) / L2, foot = [p[0] + t * dx, p[1] + t * dy];
+  const d = Math.abs(dx * my - dy * mx) / Math.sqrt(L2), r = target.r;
+  let kind = 'mist', pts = [];
+  if (Math.abs(d - r) < 1e-6) { kind = 'raak'; pts = [foot]; }
+  else if (d < r) { kind = 'snijdt'; const h = Math.sqrt(r * r - d * d) / Math.sqrt(L2); pts = [[foot[0] + h * dx, foot[1] + h * dy], [foot[0] - h * dx, foot[1] - h * dy]]; }
+  let through = true;
+  if (target.through) { const ax = target.through[0] - p[0], ay = target.through[1] - p[1]; through = Math.abs(dx * ay - dy * ax) / Math.sqrt(L2) < 1e-6; }
+  return { kind, d, foot, pts, through };
+}
+const sceneBase = () => ({ circles: [], points: [], lines: [], segs: [], extent: [] });
+function fitView(sc, aspect = 1) {
+  const xs = [0], ys = [0];
+  const add = (x, y) => { xs.push(x); ys.push(y); };
+  sc.circles.forEach(c => { add(c.M[0] - c.r, c.M[1] - c.r); add(c.M[0] + c.r, c.M[1] + c.r); });
+  sc.points.forEach(p => add(p.p[0], p.p[1]));
+  sc.segs.forEach(s => { add(s.p[0], s.p[1]); add(s.q[0], s.q[1]); });
+  (sc.extent || []).forEach(e => add(e[0], e[1]));
+  const pad = sc.pad == null ? 1.2 : sc.pad;
+  let x0 = Math.floor(Math.min(...xs) - pad), x1 = Math.ceil(Math.max(...xs) + pad);
+  let y0 = Math.floor(Math.min(...ys) - pad), y1 = Math.ceil(Math.max(...ys) + pad);
+  const w = x1 - x0, h = y1 - y0;
+  if (w / h < aspect) { const d = (h * aspect - w) / 2; x0 -= d; x1 += d; }
+  else { const d = (w / aspect - h) / 2; y0 -= d; y1 += d; }
+  return [x0, x1, y0, y1];
+}
+
+/* ---------- stappen ---------- */
+// lvl 0 = kern (altijd), 1 = tussenstap, 2 = extra hulp (alleen in de eerste ronde)
+const inp = (lvl, prompt, slots, o = {}) => ({ type: 'input', lvl, prompt, slots, ...o });
+const cho = (lvl, prompt, choices, o = {}) => ({ type: 'choice', lvl, prompt, choices: shuffle(choices), ...o });
+const tap = (lvl, prompt, test, answer, o = {}) => ({ type: 'tap', lvl, prompt, test, answer, ansHtml: `(${answer[0]}, ${answer[1]})`.replace(/-/g, '−'), ...o });
+const S = (v, show) => (v instanceof Q ? { v: v.v, show: show || fq(v) } : { v, show: show != null ? show : fq(v) });
+const inRange = (pts, m = 10) => pts.every(p => Math.abs(p[0]) <= m && Math.abs(p[1]) <= m);
+
+/* ===================== M0: middelpunt en straal ===================== */
+function gM0(variant) {
+  const sc = sceneBase();
+  if (variant === 'half') {
+    let p, qq, s, r2;
+    do { p = pick([1, 3, 5, 7]) * sgn(); qq = pick([1, 3, 5, 7]) * sgn(); s = rnd(-8, 10); r2 = q(p * p + qq * qq, 4).sub(s); } while (s === 0 || r2.v < 2 || r2.v > 30);
+    const M = [q(-p, 2), q(-qq, 2)], hx = q(p, 2), hy = q(qq, 2);
+    const circ = { M: [M[0].v, M[1].v], r: Math.sqrt(r2.v), name: 'c', hidden: true }, pm = { p: circ.M, name: 'M', hidden: true };
+    sc.circles.push(circ); sc.points.push(pm);
+    return {
+      given: `Cirkel ${V('c')}: ${circExp(p, qq, s)}. Bepaal het middelpunt ${V('M')} en de straal ${V('r')}.`, scene: sc,
+      steps: [inp(0, `${V('M')}({0}, {1}) en ${V('r')} = √{2}`, [S(M[0]), S(M[1]), S(r2)], {
+        hint: `Splits kwadraten af. De helft van ${fq(p)} is ${fq(hx)}, dus ${V('x')}<sup>2</sup>${vterm(p, 'x')} = ${sq('x', M[0])} − ${fq(hx.mul(hx))}. Doe hetzelfde voor ${V('y')}.`,
+        uitleg: `${sq('x', M[0])} − ${fq(hx.mul(hx))} + ${sq('y', M[1])} − ${fq(hy.mul(hy))}${vterm(s, '')} = 0<br>${circEq(M, r2)}<br>Dus ${P('M', M)} en ${V('r')} = ${rt(r2)}.`,
+        after: () => { circ.hidden = false; pm.hidden = false; },
+      })],
+    };
+  }
+  let a, b, r2, s;
+  do { a = rnd(-5, 5); b = rnd(-5, 5); r2 = pick([4, 9, 16, 25, 5, 10, 13, 20]); s = a * a + b * b - r2; } while (a === 0 || b === 0 || s === 0);
+  const p = -2 * a, qq = -2 * b, M = [a, b];
+  const circ = { M, r: Math.sqrt(r2), name: 'c', hidden: true }, pm = { p: M, name: 'M', hidden: true };
+  sc.circles.push(circ); sc.points.push(pm);
+  const form = (cx, kx, cy, ky, sg) => `${sq('x', cx)} ${sg} ${kx} + ${sq('y', cy)} ${sg} ${ky}${vterm(s, '')} = 0`;
+  const xsplit = `${V('x')}<sup>2</sup>${vterm(p, 'x')} = ${sq('x', a)} − ${a * a}`;
+  return {
+    given: `Cirkel ${V('c')}: ${circExp(p, qq, s)}. Bepaal het middelpunt ${V('M')} en de straal ${V('r')}.`, scene: sc,
+    steps: [
+      cho(2, 'Splits de kwadraten af. Welke regel klopt?', [
+        { html: form(a, a * a, b, b * b, '−'), ok: true },
+        { html: form(a, a * a, b, b * b, '+'), why: `Het kwadraat van de helft trek je er juist af: ${xsplit}.` },
+        { html: form(2 * a, 4 * a * a, 2 * b, 4 * b * b, '−'), why: `Neem de helft van het getal voor ${V('x')}, niet het hele getal: ${xsplit}.` },
+        { html: form(-a, a * a, -b, b * b, '−'), why: `Let op het teken binnen de haakjes: ${xsplit}.` },
+      ], { short: 'Kwadraat afsplitsen:', hint: `Gebruik ${xsplit}.`, uitleg: `${xsplit} en ${V('y')}<sup>2</sup>${vterm(qq, 'y')} = ${sq('y', b)} − ${b * b}.` }),
+      inp(1, `${sq('x', a)} + ${sq('y', b)} = {0}`, [S(r2)], {
+        hint: `Breng de losse getallen naar de andere kant: ${a * a} + ${b * b}${vterm(-s, '')}.`,
+        uitleg: `${form(a, a * a, b, b * b, '−')}<br>${sq('x', a)} + ${sq('y', b)} = ${a * a} + ${b * b}${vterm(-s, '')} = ${r2}`,
+      }),
+      inp(0, `${V('M')}({0}, {1}) en ${V('r')} = {2}`, [S(a), S(b), S(Math.sqrt(r2), rt(r2))], {
+        hint: `Schrijf de vergelijking als (${V('x')} − ${V('a')})<sup>2</sup> + (${V('y')} − ${V('b')})<sup>2</sup> = ${V('r')}<sup>2</sup> door kwadraten af te splitsen. Dan is het middelpunt (${V('a')}, ${V('b')}). Let op de tekens en vergeet de wortel niet bij ${V('r')}.`,
+        uitleg: `${circEq(M, r2)}<br>Dus ${P('M', M)} en ${V('r')} = ${isSq(r2) ? `${root(r2)} = ` : ''}${rt(r2)}.`,
+        after: () => { circ.hidden = false; pm.hidden = false; },
+      }),
+    ],
+  };
+}
+
+/* ===================== M1: afstand punt tot cirkel ===================== */
+function gM1(variant) {
+  const sc = sceneBase(), dc = n => dd(V(n), V('c')), dM = n => dd(V(n), V('M'));
+  if (variant === 'tapnear') {
+    let dx, dy, t, M, A, T;
+    do {
+      const v = pick([[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2], [3, 4], [4, 3]]);
+      dx = v[0] * sgn(); dy = v[1] * sgn(); t = v[0] + v[1] > 6 ? 2 : pick([2, 3]);
+      M = [rnd(-3, 4), rnd(-3, 4)]; A = [M[0] + t * dx, M[1] + t * dy]; T = [M[0] + dx, M[1] + dy];
+    } while (!inRange([A], 9));
+    const r2 = dx * dx + dy * dy, seg = { p: A, q: M, hidden: true }, pT = { p: T, name: 'T', hidden: true };
+    sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' }, { p: A, name: 'A' }, pT); sc.segs.push(seg);
+    const dAM = t * t * r2;
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r2)} met middelpunt ${V('M')} en het punt ${P('A', A)} buiten ${V('c')}.`, scene: sc,
+      steps: [
+        tap(0, `Tik het roosterpunt op ${V('c')} aan dat het dichtst bij ${V('A')} ligt.`, pt => pt[0] === T[0] && pt[1] === T[1], T, {
+          short: 'Dichtstbijzijnde punt op de cirkel:', hint: `De kortste weg van ${V('A')} naar de cirkel loopt recht op ${V('M')} af.`,
+          uitleg: `Het dichtstbijzijnde punt ligt op het lijnstuk ${V('AM')}: dat is ${P('T', T)}.`, after: () => { seg.hidden = false; pT.hidden = false; },
+        }),
+        inp(1, `${dc('A')} = {0}`, [S(Math.sqrt(dAM) - Math.sqrt(r2), isSq(r2) ? String(Math.sqrt(dAM) - Math.sqrt(r2)) : `${rt(dAM)} − ${rt(r2)}`)], {
+          hint: `${dc('A')} = ${dM('A')} − ${V('r')}. Bereken eerst ${dM('A')}.`,
+          uitleg: `${dM('A')} = ${distWork(M, A)} = ${rt(dAM)} en ${V('r')} = ${rt(r2)}, dus ${dc('A')} = ${rt(dAM)} − ${rt(r2)}${isSq(r2) ? ` = ${Math.sqrt(dAM) - Math.sqrt(r2)}` : ` = ${t === 2 ? '' : t - 1}${rt(r2)}, want ${rt(dAM)} = ${t}${rt(r2)}`}.`,
+        }),
+      ],
+    };
+  }
+  if (variant === 'tapdist') {
+    const M = [rnd(-2, 3), rnd(-2, 3)], r = pick([2, 3]), k = 5 - r, ans = [M[0] + 3, M[1] + 4];
+    sc.circles.push({ M, r, name: 'c' }); sc.points.push({ p: M, name: 'M' });
+    sc.extent.push([M[0] - 5, M[1] - 5], [M[0] + 5, M[1] + 5]);
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r * r)} met middelpunt ${V('M')}.`, scene: sc,
+      steps: [tap(0, `Zet ${V('A')} op een roosterpunt buiten ${V('c')} zodat ${dc('A')} = ${k}.`, pt => (pt[0] - M[0]) ** 2 + (pt[1] - M[1]) ** 2 === 25, ans, {
+        short: `Een punt met ${dc('A')} = ${k}:`, hint: `Dan moet ${dM('A')} = ${V('r')} + ${k} = 5 zijn. Zoek een roosterpunt op afstand 5 van ${V('M')}. Denk aan 3-4-5.`,
+        uitleg: `${dc('A')} = ${dM('A')} − ${V('r')}, dus ${dM('A')} = ${r} + ${k} = 5. Bijvoorbeeld 3 opzij en 4 omhoog vanaf ${V('M')}: ${root('3<sup>2</sup> + 4<sup>2</sup>')} = 5.`,
+        after: s => { const m = s.marker || ans; s.points.push({ p: m, name: 'A' }); s.segs.push({ p: m, q: M }); s.marker = null; },
+      })],
+    };
+  }
+  if (variant === 'blind') {
+    let M, r, A, d2, inside;
+    do {
+      M = [rnd(-4, 5), rnd(-4, 5)]; r = rnd(3, 5); inside = Math.random() < 0.5;
+      const dx = rnd(-8, 8), dy = rnd(-8, 8); A = [M[0] + dx, M[1] + dy]; d2 = dx * dx + dy * dy;
+    } while (M[0] === 0 || M[1] === 0 || M[0] * M[0] + M[1] * M[1] === r * r || isSq(d2) || !inRange([A], 9) || (inside ? !(d2 > 1 && d2 < (r - 0.7) ** 2) : !(d2 > (r + 1) ** 2 && d2 < (r + 5) ** 2)));
+    const circ = { M, r, name: 'c', hidden: true }, pm = { p: M, name: 'M', hidden: true }, seg = { p: A, q: M, hidden: true };
+    sc.circles.push(circ); sc.points.push(pm, { p: A, name: 'A' }); sc.segs.push(seg);
+    const ans = inside ? r - Math.sqrt(d2) : Math.sqrt(d2) - r, ansH = inside ? `${r} − ${rt(d2)}` : `${rt(d2)} − ${r}`;
+    return {
+      given: `Cirkel ${V('c')}: ${circExp(-2 * M[0], -2 * M[1], M[0] * M[0] + M[1] * M[1] - r * r)} en het punt ${P('A', A)}. Bereken exact ${dc('A')}.`, scene: sc,
+      steps: [
+        inp(0, `${V('M')}({0}, {1}) en ${V('r')} = {2}`, [S(M[0]), S(M[1]), S(r)], {
+          hint: 'Splits kwadraten af om het middelpunt en de straal te vinden.', uitleg: `Kwadraat afsplitsen geeft ${circEq(M, r * r)}, dus ${P('M', M)} en ${V('r')} = ${r}.`,
+          after: () => { circ.hidden = false; pm.hidden = false; },
+        }),
+        inp(1, `${dM('A')} = {0}`, [S(Math.sqrt(d2), rt(d2))], { hint: `Afstand tussen twee punten: ${root(`(Δ${V('x')})<sup>2</sup> + (Δ${V('y')})<sup>2</sup>`)}.`, uitleg: `${dM('A')} = ${distWork(M, A)} = ${rt(d2)}`, after: () => { seg.hidden = false; } }),
+        cho(1, `${dM('A')} = ${rt(d2)} ≈ ${fdec(Math.sqrt(d2), 2)} en ${V('r')} = ${r}. Waar ligt ${V('A')}?`, [
+          { html: `binnen ${V('c')}`, ok: inside, why: inside ? '' : `${rt(d2)} is groter dan ${r}, dus ${V('A')} ligt verder van ${V('M')} dan de cirkelrand.` },
+          { html: `buiten ${V('c')}`, ok: !inside, why: inside ? `${rt(d2)} is kleiner dan ${r}, dus ${V('A')} ligt dichter bij ${V('M')} dan de cirkelrand.` : '' },
+        ], { short: `${V('A')} ligt`, hint: `Vergelijk ${dM('A')} met ${V('r')}.`, uitleg: `${dM('A')} ${inside ? '<' : '>'} ${V('r')}, dus ${V('A')} ligt ${inside ? 'binnen' : 'buiten'} ${V('c')}.` }),
+        inp(0, `${dc('A')} = {0}`, [S(ans, ansH)], {
+          hint: `Bereken ${dM('A')} en vergelijk met ${V('r')}. Buiten de cirkel: ${dM('A')} − ${V('r')}. Binnen de cirkel: ${V('r')} − ${dM('A')}.`,
+          uitleg: `${dM('A')} = ${distWork(M, A)} = ${rt(d2)} ${inside ? '<' : '>'} ${r}, dus ${V('A')} ligt ${inside ? 'binnen' : 'buiten'} ${V('c')}.<br>${dc('A')} = ${inside ? `${V('r')} − ${dM('A')}` : `${dM('A')} − ${V('r')}`} = ${ansH}`,
+          after: () => { seg.hidden = false; },
+        }),
+      ],
+    };
+  }
+  const inside = variant === 'binnen', nm = inside ? 'B' : 'A';
+  let M, r, A, d2;
+  do {
+    M = [rnd(-3, 5), rnd(-3, 5)]; r = inside ? rnd(3, 6) : rnd(2, 5);
+    const dx = rnd(-9, 9), dy = rnd(-9, 9); A = [M[0] + dx, M[1] + dy]; d2 = dx * dx + dy * dy;
+  } while (!inRange([A], 10) || (isSq(d2) && Math.random() < 0.8) || (inside ? !(d2 > 1 && d2 < (r - 0.6) ** 2) : !(d2 > (r + 1) ** 2 && d2 <= (r + 6) ** 2)));
+  const seg = { p: A, q: M, hidden: true };
+  sc.circles.push({ M, r, name: 'c' }); sc.points.push({ p: M, name: 'M' }, { p: A, name: nm }); sc.segs.push(seg);
+  const sqd = Math.sqrt(d2), ans = inside ? r - sqd : sqd - r;
+  const ansH = isSq(d2) ? String(ans) : inside ? `${r} − ${rt(d2)}` : `${rt(d2)} − ${r}`;
+  return {
+    given: `Cirkel ${V('c')}: ${circEq(M, r * r)} met middelpunt ${V('M')} en het punt ${P(nm, A)} ${inside ? 'binnen' : 'buiten'} ${V('c')}. Bereken exact ${dc(nm)}.`, scene: sc,
+    steps: [
+      inp(1, `${dM(nm)} = {0}`, [S(sqd, rt(d2))], { hint: `Afstand tussen twee punten: ${root(`(Δ${V('x')})<sup>2</sup> + (Δ${V('y')})<sup>2</sup>`)}.`, uitleg: `${dM(nm)} = ${distWork(M, A)} = ${isSq(d2) ? `${root(d2)} = ` : ''}${rt(d2)}`, after: () => { seg.hidden = false; } }),
+      inp(0, `${dc(nm)} = {0}`, [S(ans, ansH)], {
+        hint: inside ? `${V('B')} ligt binnen ${V('c')}: de afstand tot de rand is ${V('r')} − ${dM('B')}. Bereken eerst ${dM('B')}.` : `${V('A')} ligt buiten ${V('c')}: haal de straal van ${dM('A')} af. Bereken eerst ${dM('A')}.`,
+        uitleg: `${dM(nm)} = ${distWork(M, A)} = ${rt(d2)} en ${V('r')} = ${r}.<br>${dc(nm)} = ${inside ? `${V('r')} − ${dM(nm)} = ${r} − ${rt(d2)}` : `${dM(nm)} − ${V('r')} = ${rt(d2)} − ${r}`}${isSq(d2) ? ` = ${ans}` : ''}`,
+        after: () => { seg.hidden = false; },
+      }),
+    ],
+  };
+}
+
+/* ===================== M2: twee cirkels, lijn en cirkel ===================== */
+function gM2(variant) {
+  const sc = sceneBase(), c1 = `${V('c')}<sub>1</sub>`, c2 = `${V('c')}<sub>2</sub>`, dMN = dd(V('M'), V('N'));
+  if (variant === 'twee') {
+    let M, N, r1, r2, d2;
+    do { M = [rnd(-4, 2), rnd(-2, 5)]; N = [M[0] + rnd(3, 8), M[1] + rnd(-5, 5)]; r1 = pick([1, 1.5, 2, 2.5, 3]); r2 = pick([1, 1.5, 2, 2.5]); d2 = (N[0] - M[0]) ** 2 + (N[1] - M[1]) ** 2; }
+    while (isSq(d2) || N[1] === M[1] || Math.sqrt(d2) < r1 + r2 + 0.4 || !inRange([N], 9));
+    const seg = { p: M, q: N, hidden: true }, rs = Q.of(r1 + r2);
+    sc.circles.push({ M, r: r1, name: 'c₁', lab: 130 }, { M: N, r: r2, name: 'c₂', lab: 50 }); sc.points.push({ p: M, name: 'M' }, { p: N, name: 'N' }); sc.segs.push(seg);
+    return {
+      given: `Cirkel ${c1} heeft middelpunt ${P('M', M)} en straal ${fq(r1)}. Cirkel ${c2} heeft middelpunt ${P('N', N)} en straal ${fq(r2)}. Bereken exact ${dd(c1, c2)}.`, scene: sc,
+      steps: [
+        inp(1, `${dMN} = {0}`, [S(Math.sqrt(d2), rt(d2))], { hint: 'Bereken de afstand tussen de twee middelpunten.', uitleg: `${dMN} = ${distWork(N, M)} = ${rt(d2)}`, after: () => { seg.hidden = false; } }),
+        inp(0, `${dd(c1, c2)} = {0}`, [S(Math.sqrt(d2) - r1 - r2, `${rt(d2)} − ${fq(rs)}`)], {
+          hint: `De kortste weg loopt over het lijnstuk ${V('MN')}. Haal van ${dMN} beide stralen af.`,
+          uitleg: `${dMN} = ${distWork(N, M)} = ${rt(d2)}<br>${dd(c1, c2)} = ${dMN} − ${V('r')}<sub>1</sub> − ${V('r')}<sub>2</sub> = ${rt(d2)} − ${fq(r1)} − ${fq(r2)} = ${rt(d2)} − ${fq(rs)}`,
+          after: () => { seg.hidden = false; },
+        }),
+      ],
+    };
+  }
+  if (variant === 'in') {
+    let M, R, N, r, d2;
+    do { M = [rnd(-2, 4), rnd(-2, 4)]; R = rnd(5, 7); r = pick([1, 2]); N = [M[0] + rnd(-3, 3), M[1] + rnd(-3, 3)]; d2 = (N[0] - M[0]) ** 2 + (N[1] - M[1]) ** 2; }
+    while (isSq(d2) || Math.sqrt(d2) + r > R - 0.6);
+    const seg = { p: M, q: N, hidden: true }, dcd = dd(V('c'), V('d'));
+    sc.circles.push({ M, r: R, name: 'c' }, { M: N, r, name: 'd', lab: 200 }); sc.points.push({ p: M, name: 'M' }, { p: N, name: 'N' }); sc.segs.push(seg);
+    const rc_ = `${V('r')}<sub>${V('c')}</sub>`, rd_ = `${V('r')}<sub>${V('d')}</sub>`;
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, R * R)} met middelpunt ${V('M')} en cirkel ${V('d')}: ${circEq(N, r * r)} met middelpunt ${V('N')}. Cirkel ${V('d')} ligt binnen ${V('c')}. Bereken exact ${dcd}.`, scene: sc,
+      steps: [
+        cho(2, `${V('d')} ligt binnen ${V('c')}. Welke formule geeft ${dcd}?`, [
+          { html: `${rc_} − ${dMN} − ${rd_}`, ok: true },
+          { html: `${dMN} − ${rc_} − ${rd_}`, why: `Dat is de formule voor twee cirkels die naast elkaar liggen. Hier zou het antwoord negatief worden.` },
+          { html: `${rc_} − ${rd_}`, why: `Dat klopt alleen als de middelpunten samenvallen. Hier ligt ${V('N')} niet op ${V('M')}.` },
+          { html: `${dMN} + ${rd_} − ${rc_}`, why: `Dit is precies het omgekeerde van de afstand en dus een negatief getal. Van ${V('M')} naar de rand van ${V('c')} is ${rc_}. Haal daar ${dMN} en ${rd_} van af.` },
+        ], { short: 'Formule:', hint: `Loop van ${V('M')} via ${V('N')} naar de rand van ${V('c')}. Die weg is ${rc_} lang.`, uitleg: `Van ${V('M')} naar de rand van ${V('c')} is ${rc_}. Daarvan gaat ${dMN} op aan de weg naar ${V('N')} en ${rd_} aan de straal van ${V('d')}.`, after: () => { seg.hidden = false; } }),
+        inp(1, `${dMN} = {0}`, [S(Math.sqrt(d2), rt(d2))], { hint: 'Afstand tussen de middelpunten.', uitleg: `${dMN} = ${distWork(N, M)} = ${rt(d2)}`, after: () => { seg.hidden = false; } }),
+        inp(0, `${dcd} = {0}`, [S(R - r - Math.sqrt(d2), `${R - r} − ${rt(d2)}`)], {
+          hint: `Binnen elkaar: ${dcd} = ${rc_} − ${dMN} − ${rd_}.`,
+          uitleg: `${dMN} = ${distWork(N, M)} = ${rt(d2)}<br>${dcd} = ${rc_} − ${dMN} − ${rd_} = ${R} − ${rt(d2)} − ${r} = ${R - r} − ${rt(d2)}`,
+          after: () => { seg.hidden = false; },
+        }),
+      ],
+    };
+  }
+  if (variant === 'lijnpos' || variant === 'lijndist') {
+    let a, b, M, r, dist, c, kind;
+    do {
+      [a, b] = pick([[3, 4], [4, 3], [3, -4], [4, -3]]); M = [rnd(-2, 4), rnd(-2, 4)]; r = rnd(2, 4);
+      kind = variant === 'lijndist' ? 'mist' : pick(['snijdt', 'raakt', 'mist']);
+      dist = kind === 'snijdt' ? rnd(1, r - 1) : kind === 'raakt' ? r : r + rnd(1, 3);
+      c = a * M[0] + b * M[1] + sgn() * 5 * dist;
+    } while (c === 0);
+    const val = a * M[0] + b * M[1] - c, f = val / 25, F = [M[0] - f * a, M[1] - f * b];
+    const ln = { a: -a / b, b: c / b, name: 'k', hidden: variant === 'lijnpos' }, seg = { p: M, q: F, hidden: true };
+    sc.circles.push({ M, r, name: 'c' }); sc.points.push({ p: M, name: 'M' }); sc.lines.push(ln); sc.segs.push(seg); sc.extent.push(F);
+    const dMk = dd(V('M'), V('k')), dkc = dd(V('k'), V('c'));
+    const formula = `${dMk} = ${frac(`|${V('a')}${V('x')}<sub>${V('M')}</sub> + ${V('b')}${V('y')}<sub>${V('M')}</sub> − ${V('c')}|`, root(`${V('a')}<sup>2</sup> + ${V('b')}<sup>2</sup>`))}`;
+    const work = `${dMk} = ${frac(`|${a} · ${pn(M[0])} ${b < 0 ? '−' : '+'} ${Math.abs(b)} · ${pn(M[1])} − ${pn(c)}|`, root(`${a}<sup>2</sup> + ${pn(b)}<sup>2</sup>`))} = ${frac(`|${fq(val)}|`, 5)} = ${dist}`;
+    const first = inp(variant === 'lijnpos' ? 0 : 1, `${dMk} = {0}`, [S(dist)], { hint: `Voor ${V('k')}: ${V('ax')} + ${V('by')} = ${V('c')} geldt ${formula}.`, uitleg: work, after: () => { ln.hidden = false; seg.hidden = false; } });
+    if (variant === 'lijnpos') {
+      return {
+        given: `Cirkel ${V('c')}: ${circEq(M, r * r)} met middelpunt ${V('M')} en de lijn ${V('k')}: ${lineStd(a, b, c)}. Onderzoek of ${V('k')} de cirkel snijdt, raakt of mist.`, scene: sc,
+        steps: [first, cho(0, `${dMk} = ${dist} en ${V('r')} = ${r}. Dus lijn ${V('k')} …`, [
+          { html: `snijdt ${V('c')} in twee punten`, ok: kind === 'snijdt', why: `Snijden kan alleen als de lijn dichter bij ${V('M')} komt dan de straal: ${dMk} < ${V('r')}.` },
+          { html: `raakt ${V('c')}`, ok: kind === 'raakt', why: `Raken betekent precies ${dMk} = ${V('r')}.` },
+          { html: `heeft geen punt gemeen met ${V('c')}`, ok: kind === 'mist', why: `Dat is zo als ${dMk} > ${V('r')}.` },
+        ], { short: `Lijn ${V('k')}`, hint: `Vergelijk ${dMk} met ${V('r')}.`, uitleg: `${dist} ${kind === 'snijdt' ? '<' : kind === 'raakt' ? '=' : '>'} ${r}, dus ${dMk} ${kind === 'snijdt' ? '<' : kind === 'raakt' ? '=' : '>'} ${V('r')} en ${V('k')} ${kind === 'snijdt' ? `snijdt ${V('c')} in twee punten` : kind === 'raakt' ? `raakt ${V('c')}` : `heeft geen punt gemeen met ${V('c')}`}.` })],
+      };
+    }
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r * r)} met middelpunt ${V('M')} en de lijn ${V('k')}: ${lineStd(a, b, c)}. Bereken ${dkc}.`, scene: sc,
+      steps: [first, inp(0, `${dkc} = {0}`, [S(dist - r)], {
+        hint: `De afstand van een lijn tot een cirkel is ${dMk} − ${V('r')}. ${formula}`, uitleg: `${work}<br>${dkc} = ${dMk} − ${V('r')} = ${dist} − ${r} = ${dist - r}`, after: () => { seg.hidden = false; },
+      })],
+    };
+  }
+  // 'xas': toetsstijl, twee cirkels die de x-as raken met middelpunten op een lijn
+  let p, yM, yN, xM, xN, q0, d2;
+  do {
+    p = pick([2, 3, 4]); const ys = p % 2 ? [1, 2, 3, 4] : [1, 1.5, 2, 2.5, 3, 3.5, 4];
+    yM = pick(ys); yN = pick(ys); xM = rnd(0, 3); q0 = xM + p * yM; xN = q0 - p * yN; d2 = (xN - xM) ** 2 + (yN - yM) ** 2;
+  } while (yM === yN || xN <= xM || xN > 12 || Math.sqrt(d2) < yM + yN + 0.25);
+  const M = [xM, yM], N = [xN, yN];
+  const cM = { M, r: yM, name: 'c', hidden: true, lab: 120 }, cN = { M: N, r: yN, name: 'd', hidden: true, lab: 60 }, pM = { p: M, name: 'M', hidden: true }, pN = { p: N, name: 'N', hidden: true }, seg = { p: M, q: N, hidden: true };
+  sc.circles.push(cM, cN); sc.points.push(pM, pN); sc.segs.push(seg); sc.lines.push({ a: -1 / p, b: q0 / p, name: 'k' });
+  const dcd = dd(V('c'), V('d')), val = Math.sqrt(d2) - yM - yN, xs = (n, v) => `${V('x')}<sub>${V(n)}</sub> = ${v}`;
+  const wM = `${V('M')} op ${V('k')}: ${xM} + ${p}${V('y')} = ${q0} geeft ${V('y')} = ${fq(yM)}. De cirkel raakt de ${V('x')}-as, dus de straal is de hoogte van ${V('M')}: ${V('r')}<sub>${V('c')}</sub> = ${fq(yM)}.`;
+  const wN = `${V('N')} op ${V('k')}: ${xN} + ${p}${V('y')} = ${q0} geeft ${V('y')} = ${fq(yN)}, dus ${P('N', N)} en ${V('r')}<sub>${V('d')}</sub> = ${fq(yN)}.`;
+  const wD = `${dMN} = ${distWork(N, M)} = ${rt(Q.of(d2))}`;
+  return {
+    given: `Op de lijn ${V('k')}: ${lineStd(1, p, q0)} ligt het punt ${V('M')} met ${xs('M', xM)} en het punt ${V('N')} met ${xs('N', xN)}. De cirkels ${V('c')} met middelpunt ${V('M')} en ${V('d')} met middelpunt ${V('N')} raken de ${V('x')}-as. Bereken ${dcd}. Rond af op twee decimalen.`, scene: sc,
+    steps: [
+      inp(1, `${V('M')}(${xM}, {0}) en ${V('r')}<sub>${V('c')}</sub> = {1}`, [S(Q.of(yM)), S(Q.of(yM))], { hint: `Vul ${xs('M', xM)} in de vergelijking van ${V('k')} in. Raakt een cirkel de ${V('x')}-as, dan is de straal gelijk aan de ${V('y')}-coördinaat van het middelpunt.`, uitleg: wM, after: () => { cM.hidden = false; pM.hidden = false; } }),
+      inp(1, `${V('N')}(${xN}, {0}) en ${V('r')}<sub>${V('d')}</sub> = {1}`, [S(Q.of(yN)), S(Q.of(yN))], { hint: `Dezelfde aanpak met ${xs('N', xN)}.`, uitleg: wN, after: () => { cN.hidden = false; pN.hidden = false; } }),
+      inp(1, `${dMN} = {0}`, [S(Math.sqrt(d2), rt(Q.of(d2)))], { hint: 'Afstand tussen de middelpunten. Laat de wortel staan.', uitleg: wD, after: () => { seg.hidden = false; } }),
+      inp(0, `${dcd} ≈ {0}`, [{ v: val, show: fdec(val, 2), tol: 0.0051 }], {
+        hint: `Zoek eerst ${V('M')} en ${V('N')} op de lijn. De stralen zijn de hoogtes van de middelpunten. Daarna ${dcd} = ${dMN} − ${V('r')}<sub>${V('c')}</sub> − ${V('r')}<sub>${V('d')}</sub>.`,
+        uitleg: `${wM}<br>${wN}<br>${wD}<br>${dcd} = ${rt(Q.of(d2))} − ${fq(yM)} − ${fq(yN)} ≈ ${fdec(val, 2)}`,
+        after: () => { [cM, cN, pM, pN, seg].forEach(o => { o.hidden = false; }); },
+      }),
+    ],
+  };
+}
+
+/* ===================== M3: raaklijn in een gegeven raakpunt ===================== */
+function gM3(variant) {
+  const sc = sceneBase();
+  if (variant === 'recht') {
+    const M = [rnd(-3, 4), rnd(-3, 4)], r = rnd(2, 4), dir = pick(['boven', 'onder', 'links van', 'rechts van']);
+    const A = dir === 'boven' ? [M[0], M[1] + r] : dir === 'onder' ? [M[0], M[1] - r] : dir === 'links van' ? [M[0] - r, M[1]] : [M[0] + r, M[1]];
+    const hor = dir === 'boven' || dir === 'onder', ln = hor ? { a: 0, b: A[1], name: 'k', hidden: true } : { x: A[0], name: 'k', hidden: true };
+    sc.circles.push({ M, r, name: 'c' }); sc.points.push({ p: M, name: 'M' }, { p: A, name: 'A' }); sc.lines.push(ln);
+    const eq = (v, n) => `${V(v)} = ${fq(n)}`;
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r * r)} met middelpunt ${V('M')}. Het punt ${P('A', A)} ligt recht ${dir} ${V('M')} op de cirkel.`, scene: sc,
+      steps: [cho(0, `Welke lijn raakt ${V('c')} in ${V('A')}?`, [
+        { html: hor ? eq('y', A[1]) : eq('x', A[0]), ok: true },
+        { html: hor ? eq('x', A[0]) : eq('y', A[1]), why: `Die lijn gaat door ${V('M')} en ${V('A')}. De raaklijn staat daar loodrecht op.` },
+        { html: hor ? eq('y', M[1]) : eq('x', M[0]), why: `Die lijn gaat door het middelpunt en snijdt de cirkel dus in twee punten.` },
+        { html: lineEq(1, A[1] - A[0]), why: `Een schuine lijn door ${V('A')} snijdt de cirkel nog een keer.` },
+      ], {
+        short: `Raaklijn in ${V('A')}:`, hint: `De raaklijn staat loodrecht op de straal ${V('MA')}. Die straal loopt hier ${hor ? 'verticaal' : 'horizontaal'}.`,
+        uitleg: `${V('MA')} is ${hor ? 'verticaal' : 'horizontaal'}, dus de raaklijn is ${hor ? 'horizontaal' : 'verticaal'}: ${hor ? eq('y', A[1]) : eq('x', A[0])}. Het werkschema met richtingscoëfficiënten werkt hier niet, want een verticale lijn heeft geen rc.`,
+        after: () => { ln.hidden = false; },
+      })],
+    };
+  }
+  if (variant === 'xas') {
+    let a, b, m, which;
+    do { a = rnd(-3, 4); b = pick([1, 2, 3]) * sgn(); m = rnd(1, 4); which = pick(['C', 'D']); } while (m === Math.abs(b) && Math.random() < 0.7);
+    const M = [a, b], r2 = b * b + m * m, C = [a - m, 0], D = [a + m, 0], T = which === 'C' ? C : D;
+    const dx = T[0] - a, dy = -b, rl = q(dy, dx), rk = q(-dx, dy), bq = rk.mul(T[0]).neg();
+    const pC = { p: C, name: 'C', hidden: true, o: [-10, 14] }, pD = { p: D, name: 'D', hidden: true, o: [10, 14] };
+    sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' }, pC, pD);
+    const xC = `${V('x')}<sub>${V('C')}</sub>`, xD = `${V('x')}<sub>${V('D')}</sub>`;
+    const w1 = `${V('y')} = 0 geeft ${sq('x', a)} + ${b * b} = ${r2}, dus ${sq('x', a)} = ${m * m}. Dat geeft ${V('x')} = ${fq(a - m)} ∨ ${V('x')} = ${fq(a + m)}.`;
+    const w2 = `${rc('l')} van de lijn door ${V('M')} en ${V(which)}: ${frac(`0 − ${pn(b)}`, `${fq(T[0])} − ${pn(a)}`)} = ${fq(rl)}. ${V('q')} ⊥ ${V('l')}, dus ${rc('q')} = ${fq(rk)}.<br>${P(which, T)} invullen: 0 = ${fq(rk)} · ${pn(T[0])} + ${V('b')} geeft ${V('b')} = ${fq(bq)}. Dus ${V('q')}: ${lineEq(rk, bq)}.`;
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r2)} met middelpunt ${V('M')} snijdt de ${V('x')}-as in de punten ${V('C')} en ${V('D')} met ${xC} < ${xD}. Stel een vergelijking op van de lijn ${V('q')} die ${V('c')} raakt in ${V(which)}.`, scene: sc,
+      steps: [
+        inp(1, `${xC} = {0} en ${xD} = {1}`, [S(C[0]), S(D[0])], { hint: `Op de ${V('x')}-as geldt ${V('y')} = 0. Vul dat in de cirkelvergelijking in. Let op: ${xC} is de kleinste.`, uitleg: w1, after: () => { pC.hidden = false; pD.hidden = false; } }),
+        inp(0, `${V('q')}: ${V('y')} = {0}${V('x')} + {1}`, [S(rk), S(bq)], {
+          fire: v => [{ a: v[0], b: v[1] }], target: { M, r: Math.sqrt(r2), through: T, name: 'q', pt: which }, log: `${V('q')}: ${lineEq(rk, bq)}`,
+          hint: `Zoek eerst ${V(which)} met ${V('y')} = 0. Daarna het werkschema: ${rc('l')} van ${V('M')} naar ${V(which)}, dan ${rc('q')} · ${rc('l')} = −1, dan ${V(which)} invullen.`,
+          uitleg: `${w1}<br>${w2}`, after: () => { pC.hidden = false; pD.hidden = false; },
+        }),
+      ],
+    };
+  }
+  let dx, dy, M, A;
+  do { const v = pick([[1, 2], [2, 1], [1, 3], [3, 1], [2, 3], [3, 2], [1, 1], [2, 4], [4, 2], [1, 4], [4, 1], [3, 4], [4, 3]]); dx = v[0] * sgn(); dy = v[1] * sgn(); M = [rnd(-3, 4), rnd(-3, 4)]; A = [M[0] + dx, M[1] + dy]; } while (false);
+  const r2 = dx * dx + dy * dy, rl = q(dy, dx), rk = q(-dx, dy), bq = q(A[1]).sub(rk.mul(A[0]));
+  const seg = { p: M, q: A, hidden: true, name: 'l' };
+  sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' }, { p: A, name: 'A' }); sc.segs.push(seg);
+  const w1 = `${rc('l')} = ${frac(`${fq(A[1])} − ${pn(M[1])}`, `${fq(A[0])} − ${pn(M[0])}`)} = ${fq(rl)}`;
+  const w2 = `${V('k')} ⊥ ${V('l')}, dus ${rc('k')} · ${pn(rl)} = −1 en dat geeft ${rc('k')} = ${fq(rk)}.`;
+  const w3 = `${P('A', A)} invullen in ${V('y')} = ${vterm(rk, 'x', true)} + ${V('b')}: ${fq(A[1])} = ${fq(rk)} · ${pn(A[0])} + ${V('b')} geeft ${V('b')} = ${fq(bq)}.<br>Dus ${V('k')}: ${lineEq(rk, bq)}.`;
+  return {
+    given: `Op de cirkel ${V('c')}: ${circEq(M, r2)} met middelpunt ${V('M')} ligt het punt ${P('A', A)}. Stel een vergelijking op van de lijn ${V('k')} die ${V('c')} raakt in ${V('A')}.`, scene: sc,
+    steps: [
+      inp(2, `${rc('l')} = {0}`, [S(rl)], { hint: `${V('l')} is de lijn door ${P('M', M)} en ${V('A')}. Richtingscoëfficiënt = Δ${V('y')} gedeeld door Δ${V('x')}.`, uitleg: w1, after: () => { seg.hidden = false; } }),
+      inp(1, `${rc('k')} = {0}`, [S(rk)], { hint: `Bereken eerst ${rc('l')} van de lijn door ${V('M')} en ${V('A')}. De raaklijn staat daar loodrecht op: ${rc('k')} · ${rc('l')} = −1.`, uitleg: `${w1}<br>${w2}`, after: () => { seg.hidden = false; } }),
+      inp(0, `${V('k')}: ${V('y')} = {0}${V('x')} + {1}`, [S(rk), S(bq)], {
+        fire: v => [{ a: v[0], b: v[1] }], target: { M, r: Math.sqrt(r2), through: A, name: 'k', pt: 'A' }, log: `${V('k')}: ${lineEq(rk, bq)}`,
+        hint: `Werkschema: 1. ${rc('l')} van de lijn door ${V('M')} en ${V('A')}. 2. ${rc('k')} · ${rc('l')} = −1. 3. Vul ${V('A')} in om ${V('b')} te vinden.`,
+        uitleg: `${w1}<br>${w2}<br>${w3}`, after: () => { seg.hidden = false; },
+      }),
+    ],
+  };
+}
+
+/* ===================== M4: raaklijnen met gegeven rc ===================== */
+function gM4(variant) {
+  const sc = sceneBase(), dMk = n => dd(V('M'), V(n));
+  if (variant === 'toon') {
+    let a, t, M, b0;
+    do { a = pick([1, 2, 3]) * sgn(); t = Math.abs(a) === 1 ? pick([1, 2, 3]) : Math.abs(a) === 2 ? pick([1, 2]) : 1; M = [rnd(-3, 4), rnd(-3, 4)]; b0 = M[1] - a * M[0] + sgn() * t * (a * a + 1); } while (b0 === 0 || Math.abs(b0) > 14);
+    const k2 = a * a + 1, r2 = t * t * k2, N = Math.abs(a * M[0] - M[1] + b0), ln = { a, b: b0, name: 'p', hidden: true };
+    sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' }); sc.lines.push(ln);
+    const zero = (A, B, C, rhs) => `${vterm(A, 'x', true)}${vterm(B, 'y')}${rhs == null ? vterm(C, '') + ' = 0' : ' = ' + fq(rhs)}`;
+    const work = `${dMk('p')} = ${frac(`|${fq(a)} · ${pn(M[0])} − ${pn(M[1])}${vterm(b0, '')}|`, root(`${pn(a)}<sup>2</sup> + (−1)<sup>2</sup>`))} = ${frac(N, rt(k2))} = ${rt(r2)}`;
+    return {
+      given: `Cirkel ${V('c')}: ${circEq(M, r2)} met middelpunt ${V('M')} en de lijn ${V('p')}: ${lineEq(a, b0)}. Toon aan dat ${V('p')} de cirkel raakt.`, scene: sc,
+      steps: [
+        cho(1, `Schrijf ${V('p')} in de vorm … = 0, zodat je de afstandsformule kunt gebruiken. Welke klopt?`, [
+          { html: zero(a, -1, b0), ok: true },
+          { html: zero(a, 1, b0), why: `Haal ${V('y')} naar de andere kant: dan krijg je −${V('y')}, niet +${V('y')}.` },
+          { html: zero(a, -1, -b0), why: `Het losse getal blijft aan dezelfde kant staan als ${vterm(a, 'x', true)}, dus het teken verandert niet.` },
+          { html: zero(a, -1, 0, b0), why: `Controleer met ${V('x')} = 0: dan moet ${V('y')} = ${fq(b0)} zijn, hier krijg je ${V('y')} = ${fq(-b0)}.` },
+        ], { short: `${V('p')}:`, hint: `Trek aan beide kanten ${V('y')} af.`, uitleg: `${lineEq(a, b0)} wordt ${zero(a, -1, b0)}.` }),
+        inp(0, `${dMk('p')} = {0} en ${V('r')} = {1}`, [S(Math.sqrt(r2), rt(r2)), S(Math.sqrt(r2), rt(r2))], {
+          hint: `Schrijf ${V('p')} als ${zero(a, -1, b0)} en gebruik: voor een lijn ${V('ax')} − ${V('y')} + ${V('b')} = 0 is de afstand tot ${V('M')} gelijk aan ${frac(`|${V('a')}${V('x')}<sub>${V('M')}</sub> − ${V('y')}<sub>${V('M')}</sub> + ${V('b')}|`, root(`${V('a')}<sup>2</sup> + 1`))}. De straal lees je af uit de cirkelvergelijking.`,
+          uitleg: `${work}<br>${V('r')} = ${rt(r2)}, dus ${dMk('p')} = ${V('r')} en ${V('p')} raakt ${V('c')}.`,
+          after: () => { ln.hidden = false; }, showLines: [{ a, b: b0 }], target: { M, r: Math.sqrt(r2), name: 'p' },
+        }),
+      ],
+    };
+  }
+  let a, M, r2, rH, R, k2H, pre = null, givenTail;
+  if (variant === 'frac') {
+    a = pick([q(3, 4), q(-3, 4), q(4, 3), q(-4, 3)]); const den = a.d;
+    do { M = [den * pick([-1, 0, 1]), rnd(-3, 4)]; } while (a.mul(M[0]).sub(M[1]).n === 0);
+    r2 = den * den; R = 5; rH = String(den); k2H = `${fq(q(5, den))}`;
+  } else {
+    let ai, t;
+    do { ai = pick([1, 2, 3]) * sgn(); t = Math.abs(ai) === 1 ? pick([1, 2, 3]) : Math.abs(ai) === 2 ? pick([1, 2]) : 1; M = [rnd(-3, 4), rnd(-3, 4)]; } while (ai * M[0] - M[1] === 0);
+    a = q(ai); r2 = t * t * (ai * ai + 1); R = t * (ai * ai + 1); rH = rt(r2); k2H = rt(ai * ai + 1);
+  }
+  const c0 = a.mul(M[0]).sub(M[1]), b1 = c0.neg().sub(R), b2 = c0.neg().add(R);
+  sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' });
+  const kform = sg => `${vterm(a, 'x', true)} ${sg[0]} ${V('y')} ${sg[1]} ${V('b')} = 0`;
+  if (variant === 'lood' || variant === 'even') {
+    const lood = variant === 'lood', am = lood ? q(-1).div(a) : a, bm = rnd(-4, 5);
+    givenTail = `De lijnen ${V('k')} ${lood ? 'staan loodrecht op' : 'zijn evenwijdig aan'} de lijn ${V('m')}: ${lineEq(am, bm)} en raken ${V('c')}.`;
+    pre = inp(1, `${rc('k')} = {0}`, [S(a)], { hint: lood ? `Loodrecht: ${rc('k')} · ${rc('m')} = −1.` : `Evenwijdige lijnen hebben dezelfde richtingscoëfficiënt.`, uitleg: lood ? `${rc('m')} = ${fq(am)} en ${rc('k')} · ${rc('m')} = −1, dus ${rc('k')} = ${fq(a)}.` : `${V('k')} ∥ ${V('m')}, dus ${rc('k')} = ${rc('m')} = ${fq(a)}.` });
+  } else givenTail = `De lijnen ${V('k')} hebben richtingscoëfficiënt ${fq(a)} en raken ${V('c')}.`;
+  const wA = `${V('k')}: ${V('y')} = ${vterm(a, 'x', true)} + ${V('b')}, oftewel ${kform('−+')}.`;
+  const wB = `${dMk('k')} = ${V('r')} geeft ${frac(`|${fq(a)} · ${pn(M[0])} − ${pn(M[1])} + ${V('b')}|`, root(`${pp(a)}<sup>2</sup> + (−1)<sup>2</sup>`))} = ${rH}<br>|${fq(c0)} + ${V('b')}| = ${rH} · ${k2H} = ${R}`;
+  const wC = `${fq(c0)} + ${V('b')} = ${R} ∨ ${fq(c0)} + ${V('b')} = −${R}<br>${V('b')} = ${fq(b2)} ∨ ${V('b')} = ${fq(b1)}<br>Dus ${V('k')}<sub>1</sub>: ${lineEq(a, b2)} en ${V('k')}<sub>2</sub>: ${lineEq(a, b1)}.`;
+  const steps = [
+    cho(2, `Stel ${V('k')}: ${V('y')} = ${vterm(a, 'x', true)} + ${V('b')}. Welke vorm gebruik je in de afstandsformule?`, [
+      { html: kform('−+'), ok: true },
+      { html: kform('++'), why: `Trek aan beide kanten ${V('y')} af: je krijgt −${V('y')}.` },
+      { html: kform('−−'), why: `${V('b')} staat al aan de goede kant, het teken blijft +.` },
+      { html: `${vterm(a, 'x', true)} − ${V('y')} = ${V('b')}`, why: `Uit deze regel volgt ${V('y')} = ${vterm(a, 'x', true)} − ${V('b')}, en dat is een andere lijn. Trek in ${V('y')} = ${vterm(a, 'x', true)} + ${V('b')} aan beide kanten ${V('y')} af.` },
+    ], { short: `${V('k')}:`, hint: `Trek aan beide kanten ${V('y')} af.`, uitleg: wA }),
+    inp(1, `|{0} + ${V('b')}| = {1}`, [S(c0), S(R)], {
+      hint: `${dMk('k')} = ${V('r')}: ${frac(`|${V('a')} · ${V('x')}<sub>${V('M')}</sub> − ${V('y')}<sub>${V('M')}</sub> + ${V('b')}|`, root(`${V('a')}<sup>2</sup> + 1`))} = ${V('r')}. Vul ${V('M')} in en vermenigvuldig beide kanten met de wortel.`,
+      uitleg: `${wA}<br>${wB}`,
+    }),
+    inp(0, `${V('k')}: ${V('y')} = ${vterm(a, 'x', true)} + ${V('b')} met ${V('b')} = {0} ∨ ${V('b')} = {1}`, [S(b1), S(b2)], {
+      unordered: true, fire: v => v.map(b => ({ a: a.v, b })), target: { M, r: Math.sqrt(r2), name: 'k' }, log: `${V('k')}<sub>1</sub>: ${lineEq(a, b2)} en ${V('k')}<sub>2</sub>: ${lineEq(a, b1)}`,
+      hint: `Stel ${V('k')}: ${kform('−+')} en gebruik ${dMk('k')} = ${V('r')}. Een absolute waarde geeft twee oplossingen: … = ${R} of … = −${R}.`,
+      uitleg: `${wA}<br>${wB}<br>${wC}`,
+    }),
+  ];
+  if (pre) steps.unshift(pre);
+  return { given: `Cirkel ${V('c')}: ${circEq(M, r2)} met middelpunt ${V('M')}. ${givenTail} Stel vergelijkingen op van de lijnen ${V('k')}.`, scene: sc, steps };
+}
+
+/* ===================== M5: raaklijnen door een punt buiten de cirkel ===================== */
+const M5C = (() => {
+  const out = [];
+  for (const r2 of [4, 9, 16, 25, 2, 5, 8, 10, 13, 20]) for (let Pv = -8; Pv <= 8; Pv++) for (let Qv = -8; Qv <= 8; Qv++) {
+    if (Pv === 0 || Qv === 0 || Pv * Pv === r2 || Qv * Qv === r2) continue;
+    const k = Pv * Pv + Qv * Qv - r2; if (k <= 0 || Pv * Pv + Qv * Qv > 100) continue;
+    const D4 = r2 * k; if (!isSq(D4)) continue;
+    const s = Math.sqrt(D4), den = Pv * Pv - r2, a1 = q(-Pv * Qv - s, den), a2 = q(-Pv * Qv + s, den);
+    if (a1.d > 4 || a2.d > 4 || Math.abs(a1.v) > 4 || Math.abs(a2.v) > 4) continue;
+    out.push({ r2, P: Pv, Q: Qv });
+  }
+  return out;
+})();
+function gM5(variant, fixed) {
+  const sc = sceneBase();
+  let c, M, A, as, bs;
+  for (;;) {
+    c = fixed || pick(M5C);
+    M = fixed ? fixed.M : [rnd(-4, 5), rnd(-4, 5)]; A = [M[0] - c.P, M[1] + c.Q];
+    const s = Math.sqrt(c.r2 * (c.P * c.P + c.Q * c.Q - c.r2)), den = c.P * c.P - c.r2;
+    as = [q(-c.P * c.Q - s, den), q(-c.P * c.Q + s, den)].sort((x, y) => x.v - y.v);
+    bs = as.map(a => q(A[1]).sub(a.mul(A[0])));
+    if (fixed || (A[0] !== 0 && inRange([A], 9) && bs.every(b => Math.abs(b.v) <= 20))) break;
+  }
+  const { r2, P: Pv, Q: Qv } = c, A0 = Pv * Pv - r2, B0 = 2 * Pv * Qv, C0 = Qv * Qv - r2;
+  let g = gcd(gcd(A0, B0), C0); if (A0 < 0) g = -g;
+  const Ap = A0 / g, Bp = B0 / g, Cp = C0 / g, D = Bp * Bp - 4 * Ap * Cp, sD = Math.sqrt(D);
+  sc.circles.push({ M, r: Math.sqrt(r2), name: 'c' }); sc.points.push({ p: M, name: 'M' }, { p: A, name: 'A' });
+  const dMl = dd(V('M'), V('l')), wortel = root(`${V('a')}<sup>2</sup> + 1`), rH = rt(r2), va = V('a'), vb = V('b');
+  const num = `${vterm(Pv, 'a', true)}${vterm(Qv, '')}`;
+  const bIn = A[1] === 0 ? vterm(-A[0], 'a', true) : `${fq(A[1])}${vterm(-A[0], 'a')}`, lTail = `${vterm(A[1], '')}${vterm(-A[0], 'a')}`;
+  const w1 = `${V('l')}: ${V('y')} = ${V('ax')} + ${vb}. ${P('A', A)} op ${V('l')} geeft ${A[0] === 0 ? vb : `${vterm(A[0], 'a', true)} + ${vb}`} = ${fq(A[1])}, dus ${vb} = ${bIn}.<br>${V('l')}: ${V('ax')} − ${V('y')}${lTail} = 0`;
+  const w2 = `${dMl} = ${V('r')} geeft ${frac(`|${vterm(M[0], 'a', true) || '0'} − ${pn(M[1])}${vterm(A[1], '')}${vterm(-A[0], 'a')}|`, root(`${va}<sup>2</sup> + (−1)<sup>2</sup>`))} = ${rH}<br>|${num}| = ${rH}${wortel}`;
+  const w3 = `Kwadrateren geeft ${vterm(Pv * Pv, 'a', true)}<sup>2</sup>${vterm(B0, 'a')}${vterm(Qv * Qv, '')} = ${r2}${va}<sup>2</sup> + ${r2}<br>${poly(A0, B0, C0)}${Math.abs(g) !== 1 ? `<br>Delen door ${fq(g)} geeft ${poly(Ap, Bp, Cp)}` : ''}`;
+  const w4 = `${V('D')} = ${pn(Bp)}<sup>2</sup> − 4 · ${Ap} · ${pn(Cp)} = ${D}, dus ${root(V('D'))} = ${sD}<br>${va} = ${frac(`${fq(-Bp)} + ${sD}`, 2 * Ap)} = ${fq(as[1])} ∨ ${va} = ${frac(`${fq(-Bp)} − ${sD}`, 2 * Ap)} = ${fq(as[0])}`;
+  const bw = i => `${va} = ${fq(as[i])} geeft ${vb} = ${A[1] === 0 ? `${fq(-A[0])} · ${pp(as[i])}` : `${fq(A[1])} ${A[0] > 0 ? '−' : '+'} ${Math.abs(A[0])} · ${pp(as[i])}`} = ${fq(bs[i])}, dus ${V('l')}<sub>${i + 1}</sub>: ${lineEq(as[i], bs[i])}.`;
+  const w5 = `${bw(0)}<br>${bw(1)}`;
+  return {
+    given: `Cirkel ${V('c')}: ${circEq(M, r2)} en het punt ${P('A', A)} buiten ${V('c')}. Stel langs algebraïsche weg vergelijkingen op van de lijnen ${V('l')} die door ${V('A')} gaan en ${V('c')} raken.`, scene: sc,
+    meta: { M, A, r2, as, bs, coef: [Ap, Bp, Cp] },
+    steps: [
+      inp(2, `${V('l')}: ${V('y')} = ${V('ax')} + ${vb}. ${V('A')} op ${V('l')} geeft ${vb} = {0} − {1} · ${va}`, [S(A[1]), S(A[0])], {
+        log: `${V('l')}: ${V('y')} = ${V('ax')} + ${vb} met ${vb} = ${bIn}`,
+        hint: `Vul ${P('A', A)} in: ${A[0] === 0 ? vb : `${vterm(A[0], 'a', true)} + ${vb}`} = ${fq(A[1])}. Haal de term met ${va} naar de andere kant.`, uitleg: w1,
+      }),
+      inp(1, `${dMl} = ${V('r')} geeft |{0}${va} + {1}| = ${rH}${wortel}`, [S(Pv), S(Qv)], {
+        check: v => ({ ok: (close(v[0], Pv) && close(v[1], Qv)) || (close(v[0], -Pv) && close(v[1], -Qv)) }), log: `${dMl} = ${V('r')} geeft |${num}| = ${rH}${wortel}`,
+        hint: `Schrijf ${V('l')} als ${V('ax')} − ${V('y')} + ${vb} = 0 met ${vb} = ${bIn}. Vul ${P('M', M)} in de teller in en neem de termen met ${va} samen.`,
+        uitleg: `${w1}<br>${w2}`,
+      }),
+      inp(0, `Kwadrateren en op nul herleiden: {0}${va}<sup>2</sup> + {1}${va} + {2} = 0`, [S(Ap), S(Bp), S(Cp)], {
+        log: poly(Ap, Bp, Cp), check: v => ({ ok: v.some(x => Math.abs(x) > 1e-9) && close(v[0] * Bp, v[1] * Ap, 1e-6) && close(v[0] * Cp, v[2] * Ap, 1e-6) && close(v[1] * Cp, v[2] * Bp, 1e-6) }),
+        hint: `Je hebt |${num}| = ${rH}${wortel}. Kwadrateer beide kanten: links een merkwaardig product met dubbel product, rechts ${r2}(${va}<sup>2</sup> + 1). Breng daarna alles naar links.`,
+        uitleg: `${w1}<br>${w2}<br>${w3}`,
+      }),
+      inp(0, `${va} = {0} ∨ ${va} = {1}`, [S(as[0]), S(as[1])], {
+        unordered: true, hint: `Los ${poly(Ap, Bp, Cp)} op met de abc-formule. De discriminant is een mooi kwadraat.`, uitleg: w4,
+      }),
+      inp(0, `${V('l')}<sub>1</sub>: ${V('y')} = ${vterm(as[0], 'x', true)} + {0} en ${V('l')}<sub>2</sub>: ${V('y')} = ${vterm(as[1], 'x', true)} + {1}`, [S(bs[0]), S(bs[1])], {
+        fire: v => [{ a: as[0].v, b: v[0] }, { a: as[1].v, b: v[1] }], target: { M, r: Math.sqrt(r2), through: A, name: 'l', pt: 'A' }, log: `${V('l')}<sub>1</sub>: ${lineEq(as[0], bs[0])} en ${V('l')}<sub>2</sub>: ${lineEq(as[1], bs[1])}`,
+        hint: `Gebruik ${vb} = ${bIn} voor allebei de waarden van ${va}.`, uitleg: w5,
+      }),
+    ],
+  };
+}
+
+/* ===================== reflextest ===================== */
+function reflexQ() {
+  const T = [
+    () => ({ q: `${V('A')} ligt buiten cirkel ${V('c')}. Dan is ${dd(V('A'), V('c'))} =`, o: [`${dd(V('A'), V('M'))} − ${V('r')}`, `${dd(V('A'), V('M'))} + ${V('r')}`, `${V('r')} − ${dd(V('A'), V('M'))}`] }),
+    () => ({ q: `${V('B')} ligt binnen cirkel ${V('c')}. Dan is ${dd(V('B'), V('c'))} =`, o: [`${V('r')} − ${dd(V('B'), V('M'))}`, `${dd(V('B'), V('M'))} − ${V('r')}`, `${dd(V('B'), V('M'))} + ${V('r')}`] }),
+    () => ({ q: `Lijn ${V('k')} raakt ${V('c')} in ${V('A')}. Lijn ${V('l')} gaat door ${V('M')} en ${V('A')}. Dan geldt`, o: [`${V('k')} ⊥ ${V('l')}`, `${V('k')} ∥ ${V('l')}`, `${V('k')} = ${V('l')}`] }),
+    () => { const [a, b] = pick([[1, 2], [2, 3], [3, 4], [1, 3], [2, 1], [3, 1], [3, 2], [4, 3]]), s = sgn(); return { q: `${rc('l')} = ${fq(q(s * a, b))} en ${V('k')} ⊥ ${V('l')}. Dan is ${rc('k')} =`, o: [fq(q(-s * b, a)), fq(q(s * b, a)), fq(q(-s * a, b))] }; },
+    () => { const r = rnd(3, 6), k = pick([-2, -1, 0, 1, 2]), d = r + k, o = [`snijdt ${V('c')} in twee punten`, `raakt ${V('c')}`, `mist ${V('c')}`], i = k < 0 ? 0 : k === 0 ? 1 : 2; return { q: `${dd(V('M'), V('k'))} = ${d} en ${V('r')} = ${r}. Lijn ${V('k')}`, o: [o[i], ...o.filter((_, j) => j !== i)] }; },
+    () => { const w = pick([['buiten', 2], ['op', 1], ['binnen', 0]]); return { q: `Punt ${V('A')} ligt ${w[0]} de cirkel. Hoeveel raaklijnen gaan er door ${V('A')}?`, o: [String(w[1]), ...[0, 1, 2].filter(n => n !== w[1]).map(String)] }; },
+    () => { let a, b; do { a = rnd(1, 6) * sgn(); b = rnd(1, 6) * sgn(); } while (Math.abs(a) === Math.abs(b)); const r2 = pick([9, 16, 25, 10]); return { q: `Het middelpunt van ${circEq([a, b], r2)} is`, o: [`(${fq(a)}, ${fq(b)})`, `(${fq(-a)}, ${fq(-b)})`, `(${fq(b)}, ${fq(a)})`, `(${fq(-a)}, ${fq(b)})`] }; },
+    () => { const n = pick([5, 10, 13, 20, 8]); return { q: `De straal van ${circEq([2, -1], n)} is`, o: [rt(n), String(n), fq(q(n, 2)), String(n * n)] }; },
+    () => { const r1 = rnd(1, 4), r2 = rnd(1, 3), g = rnd(1, 5), d = r1 + r2 + g; return { q: `Twee cirkels naast elkaar met middelpunten ${V('M')} en ${V('N')}: ${dd(V('M'), V('N'))} = ${d}, ${V('r')}<sub>1</sub> = ${r1}, ${V('r')}<sub>2</sub> = ${r2}. De afstand tussen de cirkels is`, o: [String(g), String(d - r1), String(d + r1 + r2), String(d)].filter((x, i, a) => a.indexOf(x) === i) }; },
+    () => { const r = rnd(1, 2), d = rnd(1, 3), g = rnd(1, 3), R = r + d + g; return { q: `Cirkel ${V('d')} (middelpunt ${V('N')}) ligt binnen ${V('c')} (middelpunt ${V('M')}): ${V('r')}<sub>${V('c')}</sub> = ${R}, ${V('r')}<sub>${V('d')}</sub> = ${r}, ${dd(V('M'), V('N'))} = ${d}. Dan is ${dd(V('c'), V('d'))} =`, o: [String(g), String(R - r), String(R + r + d), String(R - d)].filter((x, i, a) => a.indexOf(x) === i) }; },
+    () => { const a = pick([2, 3, -2, 4]); return { q: `${V('k')}: ${V('y')} = ${vterm(a, 'x', true)} + ${V('b')} in de vorm … = 0 is`, o: [`${vterm(a, 'x', true)} − ${V('y')} + ${V('b')} = 0`, `${vterm(a, 'x', true)} + ${V('y')} + ${V('b')} = 0`, `${vterm(a, 'x', true)} − ${V('y')} − ${V('b')} = 0`] }; },
+    () => { const [a, r] = pick([[q(3, 4), q(5, 4)], [q(4, 3), q(5, 3)], [q(1), null], [q(2), null]]); const n = a.mul(a).add(1); return { q: `${root(`${r ? `(${fq(a)})` : fq(a)}<sup>2</sup> + 1`)} =`, o: r ? [fq(r), fq(a.add(1)), fq(n)] : [rt(n.n), fq(a.add(1)), String(n.n + 1)] }; },
+    () => { const p = rnd(2, 7), c = rnd(1, 3), r = pick([2, 3, 5]); return { q: `Kwadrateer |${p}${V('a')} + ${c}| = ${r}${root(`${V('a')}<sup>2</sup> + 1`)}`, o: [`${p * p}${V('a')}<sup>2</sup> + ${2 * p * c}${V('a')} + ${c * c} = ${r * r}${V('a')}<sup>2</sup> + ${r * r}`, `${p * p}${V('a')}<sup>2</sup> + ${c * c} = ${r * r}${V('a')}<sup>2</sup> + ${r * r}`, `${p * p}${V('a')}<sup>2</sup> + ${2 * p * c}${V('a')} + ${c * c} = ${r * r}${V('a')}<sup>2</sup> + 1`] }; },
+    () => { let x = rnd(2, 6), y = rnd(2, 6); if (x === y) y++; const as = pick(['x', 'y']); return { q: `Een cirkel met middelpunt ${P('M', [x, y])} raakt de ${V(as)}-as. De straal is`, o: as === 'x' ? [String(y), String(x), rt(x * x + y * y)] : [String(x), String(y), rt(x * x + y * y)] }; },
+    () => { const x = rnd(-3, 4), y = rnd(-3, 3), r = rnd(2, 4); return { q: `${P('M', [x, y])}, ${V('r')} = ${r}. De raaklijn in het hoogste punt van de cirkel is`, o: [`${V('y')} = ${fq(y + r)}`, `${V('x')} = ${fq(x)}`, `${V('y')} = ${fq(y)}`, `${V('x')} = ${fq(x + r)}`].filter((v, i, a) => a.indexOf(v) === i) }; },
+    () => { const h = rnd(1, 6) * sgn(); return { q: `${V('x')}<sup>2</sup>${vterm(2 * h, 'x')} =`, o: [`${sq('x', -h)} − ${h * h}`, `${sq('x', -h)} + ${h * h}`, `${sq('x', -2 * h)} − ${4 * h * h}`, `${sq('x', h)} − ${h * h}`] }; },
+    () => { const [a, b, c] = pick([[3, 4, 5], [6, 8, 10], [5, 12, 13]]), x = rnd(-3, 3), y = rnd(-3, 3), s = sgn(); return { q: `${dd(P('A', [x, y]), P('B', [x + s * a, y + b]))} =`, o: [String(c), String(a + b), rt(a + b), String(c * c)] }; },
+    () => { const x = rnd(-2, 3), y = rnd(-2, 3), dx = pick([1, 2, 3]), k = pick([-3, -2, 2, 3]); return { q: `De lijn door ${P('M', [x, y])} en ${P('A', [x + dx, y + k * dx])} heeft rc`, o: [fq(k), fq(q(1, k)), fq(-k), fq(q(-1, k))] }; },
+    () => ({ q: `Bij ${dd(V('M'), V('l'))} = ${V('r')} krijg je |${V('b')} + 3| = 10. Dan is`, o: [`${V('b')} = 7 ∨ ${V('b')} = −13`, `${V('b')} = 7`, `${V('b')} = 13 ∨ ${V('b')} = −7`] }),
+    () => ({ q: `De afstand van een punt tot een cirkel meet je langs de lijn door het punt en`, o: ['het middelpunt', 'de oorsprong', 'het hoogste punt van de cirkel'] }),
+  ];
+  const t = pick(T)();
+  return { q: t.q, opts: shuffle(t.o.map((h, i) => ({ html: h, ok: i === 0 }))) };
+}
+
+if (typeof module !== 'undefined') module.exports = { Q, q, evalExpr, checkInput, lineStatus, fitView, gM0, gM1, gM2, gM3, gM4, gM5, M5C, reflexQ, fq, rt, lineEq };
+
+'use strict';
+/* Schampschot: interface. Gebruikt de globale functies uit math.js. */
+(function () {
+  const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
+  const RM = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+  /* ---------- opslag ---------- */
+  const KEY = 'schampschot.v1';
+  const store = Object.assign({ xp: 0, stars: {}, best: 0, sound: true, day: '', streak: 0 }, (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } })());
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) { /* zonder opslag werkt het spel ook */ } };
+  const RANKS = [[0, 'Rekruut'], [150, 'Schutter'], [400, 'Scherpschutter'], [800, 'Tacticus'], [1400, 'Commandant'], [2200, 'Legende']];
+  function rank(xp) { let i = 0; while (i + 1 < RANKS.length && xp >= RANKS[i + 1][0]) i++; const nx = RANKS[i + 1]; return { name: RANKS[i][1], lo: RANKS[i][0], hi: nx ? nx[0] : null, next: nx ? nx[1] : null }; }
+  const dayKey = d => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  function dayStreak() { const now = new Date(), t = dayKey(now); if (store.day === t) return; const y = new Date(now); y.setDate(y.getDate() - 1); store.streak = store.day === dayKey(y) ? store.streak + 1 : 1; store.day = t; }
+
+  /* ---------- geluid ---------- */
+  let AC = null;
+  function tone(f, t, type, g, when, f2) {
+    if (!store.sound) return;
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      const o = AC.createOscillator(), ga = AC.createGain(), t0 = AC.currentTime + (when || 0);
+      o.type = type || 'sine'; o.frequency.setValueAtTime(f, t0); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t0 + t);
+      ga.gain.setValueAtTime(g || 0.05, t0); ga.gain.exponentialRampToValueAtTime(0.0001, t0 + t);
+      o.connect(ga); ga.connect(AC.destination); o.start(t0); o.stop(t0 + t + 0.02);
+    } catch (e) { /* geen geluid beschikbaar */ }
+  }
+  const sfx = {
+    ok() { tone(660, 0.07, 'triangle'); tone(990, 0.1, 'triangle', 0.05, 0.07); },
+    bad() { tone(170, 0.18, 'sawtooth', 0.035); },
+    key() { tone(420, 0.03, 'square', 0.012); },
+    fire() { tone(1500, 0.4, 'sawtooth', 0.03, 0, 220); },
+    hit() { tone(1300, 0.05, 'square', 0.03); tone(1900, 0.14, 'triangle', 0.04, 0.05); },
+    win() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.13, 'triangle', 0.05, i * 0.1)); },
+  };
+
+  /* ---------- veld ---------- */
+  class Field {
+    // fit = true: het assenstelsel vult het hele vak en tekst houdt zijn echte grootte
+    constructor(svg, fit) {
+      this.svg = svg; this.scene = null; this.mode = null; this.cb = null; this.down = false; this.fit = !!fit; this.W = this.H = 360;
+      svg.setAttribute('viewBox', '0 0 360 360');
+      if (fit && window.ResizeObserver) new ResizeObserver(() => { if (this.scene && this.svg.getBoundingClientRect().width) this.set(this.scene); }).observe(svg);
+      const h = e => { if (!this.mode || !this.scene) return; e.preventDefault(); if (this.cb) this.cb(this.toMath(e)); };
+      svg.addEventListener('pointerdown', e => { if (!this.mode) return; this.down = true; try { svg.setPointerCapture(e.pointerId); } catch (_) { /* niet nodig */ } h(e); });
+      svg.addEventListener('pointermove', e => { if (this.down) h(e); });
+      const up = () => { this.down = false; };
+      svg.addEventListener('pointerup', up); svg.addEventListener('pointercancel', up);
+    }
+    interact(mode, cb) { this.mode = mode; this.cb = cb || null; this.svg.classList.toggle('live', !!mode); }
+    set(scene, view) {
+      this.scene = scene;
+      if (this.fit) { const r = this.svg.getBoundingClientRect(); if (r.width > 20 && r.height > 20) { this.W = r.width; this.H = r.height; } this.svg.setAttribute('viewBox', `0 0 ${this.W.toFixed(1)} ${this.H.toFixed(1)}`); }
+      this.view = view || fitView(scene, this.W / this.H); this.u = this.W / (this.view[1] - this.view[0]); this.draw();
+    }
+    geom() { const r = this.svg.getBoundingClientRect(), s = Math.min(r.width / this.W, r.height / this.H); return { s, ox: r.left + (r.width - this.W * s) / 2, oy: r.top + (r.height - this.H * s) / 2 }; }
+    toMath(e) { const g = this.geom(); return [this.view[0] + (e.clientX - g.ox) / g.s / this.u, this.view[3] - (e.clientY - g.oy) / g.s / this.u]; }
+    toScreen(p) { const g = this.geom(); return [g.ox + (p[0] - this.view[0]) * this.u * g.s, g.oy + (this.view[3] - p[1]) * this.u * g.s]; }
+    clip(ln) {
+      const [x0, x1, y0, y1] = this.view, [p, w] = twoPts(ln), dx = w[0] - p[0], dy = w[1] - p[1];
+      if (Math.abs(dx) + Math.abs(dy) < 1e-12) return null;
+      let t0 = -Infinity, t1 = Infinity;
+      for (const [pp, qq] of [[-dx, p[0] - x0], [dx, x1 - p[0]], [-dy, p[1] - y0], [dy, y1 - p[1]]]) {
+        if (Math.abs(pp) < 1e-12) { if (qq < 0) return null; } else { const t = qq / pp; if (pp < 0) t0 = Math.max(t0, t); else t1 = Math.min(t1, t); }
+      }
+      if (t0 > t1) return null;
+      return [[p[0] + t0 * dx, p[1] + t0 * dy], [p[0] + t1 * dx, p[1] + t1 * dy]];
+    }
+    lineTag(ln, cls, extra) {
+      const c = this.clip(ln); if (!c) return '';
+      const n = v => v.toFixed(1), X = x => (x - this.view[0]) * this.u, Y = y => (this.view[3] - y) * this.u;
+      return `<line class="${cls}" ${extra || ''} x1="${n(X(c[0][0]))}" y1="${n(Y(c[0][1]))}" x2="${n(X(c[1][0]))}" y2="${n(Y(c[1][1]))}"/>`;
+    }
+    draw() {
+      const sc = this.scene; if (!sc) return;
+      const [x0, x1, y0, y1] = this.view, u = this.u, VW = this.W, VH = this.H, X = x => (x - x0) * u, Y = y => (y1 - y) * u, n = v => v.toFixed(1), num = v => String(v).replace('-', '−');
+      let h = '<g class="grid">';
+      for (let x = Math.ceil(x0); x <= x1; x++) h += `<line x1="${n(X(x))}" y1="0" x2="${n(X(x))}" y2="${n(VH)}"/>`;
+      for (let y = Math.ceil(y0); y <= y1; y++) h += `<line x1="0" y1="${n(Y(y))}" x2="${n(VW)}" y2="${n(Y(y))}"/>`;
+      h += '</g>';
+      if (!sc.bare) {
+        const st = u >= 17 ? 1 : u >= 9 ? 2 : 5, ax = X(0), ay = Y(0);
+        h += `<g class="axes"><line x1="0" y1="${n(ay)}" x2="${n(VW)}" y2="${n(ay)}"/><line x1="${n(ax)}" y1="0" x2="${n(ax)}" y2="${n(VH)}"/><path d="M${n(VW)} ${n(ay)}l-7-3.5v7z"/><path d="M${n(ax)} 0l-3.5 7h7z"/></g><g class="ticks">`;
+        for (let x = Math.ceil((x0 + 0.5) / st) * st; x < x1; x += st) if (x !== 0) h += `<text x="${n(X(x))}" y="${n(ay + 11)}" text-anchor="middle">${num(x)}</text>`;
+        for (let y = Math.ceil((y0 + 0.5) / st) * st; y < y1; y += st) if (y !== 0) h += `<text x="${n(ax - 4)}" y="${n(Y(y) + 3)}" text-anchor="end">${num(y)}</text>`;
+        h += `<text class="it" x="${n(ax - 5)}" y="${n(ay + 13)}" text-anchor="end">O</text><text class="it" x="${n(VW - 5)}" y="${n(ay - 6)}" text-anchor="end">x</text><text class="it" x="${n(ax + 7)}" y="12">y</text></g>`;
+      }
+      sc.circles.forEach(c => {
+        if (c.hidden) return;
+        h += `<circle class="circ" cx="${n(X(c.M[0]))}" cy="${n(Y(c.M[1]))}" r="${n(c.r * u)}"/>`;
+        if (c.name) { const a = (c.lab == null ? -40 : c.lab) * Math.PI / 180; h += `<text class="lab lc" text-anchor="middle" x="${n(X(c.M[0] + c.r * Math.cos(a)) + 10 * Math.cos(a))}" y="${n(Y(c.M[1] + c.r * Math.sin(a)) - 10 * Math.sin(a) + 4)}">${c.name}</text>`; }
+      });
+      sc.segs.forEach(s => {
+        if (s.hidden) return;
+        const ax = X(s.p[0]), ay = Y(s.p[1]), bx = X(s.q[0]), by = Y(s.q[1]);
+        h += `<line class="seg" x1="${n(ax)}" y1="${n(ay)}" x2="${n(bx)}" y2="${n(by)}"/>`;
+        if (s.name) { const L = Math.hypot(bx - ax, by - ay) || 1; h += `<text class="lab ll" text-anchor="middle" x="${n((ax + bx) / 2 - (by - ay) / L * 11)}" y="${n((ay + by) / 2 + (bx - ax) / L * 11 + 4)}">${s.name}</text>`; }
+      });
+      sc.lines.forEach(l => {
+        if (l.hidden) return; const c = this.clip(l); if (!c) return;
+        h += this.lineTag(l, 'ln');
+        if (l.name) {
+          const ax = X(c[0][0]), ay = Y(c[0][1]), bx = X(c[1][0]), by = Y(c[1][1]), L = Math.hypot(bx - ax, by - ay) || 1, ux = (bx - ax) / L, uy = (by - ay) / L;
+          h += `<text class="lab ll" text-anchor="middle" x="${n(clamp(bx - ux * 22 - uy * 11, 10, VW - 10))}" y="${n(clamp(by - uy * 22 + ux * 11 + 4, 14, VH - 6))}">${l.name}</text>`;
+        }
+      });
+      (sc.beams || []).forEach(b => { h += this.lineTag(b.ln, `beam st-${b.st}`); });
+      (sc.right || []).forEach(m => { const px = X(m.at[0]), py = Y(m.at[1]), s = 9, a = [m.u[0] * s, -m.u[1] * s], b = [m.v[0] * s, -m.v[1] * s]; h += `<path class="sq" d="M${n(px + a[0])} ${n(py + a[1])}L${n(px + a[0] + b[0])} ${n(py + a[1] + b[1])}L${n(px + b[0])} ${n(py + b[1])}"/>`; });
+      const c0 = sc.circles.find(c => !c.hidden);
+      sc.points.forEach(p => {
+        if (p.hidden) return;
+        const px = X(p.p[0]), py = Y(p.p[1]); let o = p.o;
+        if (!o) {
+          const dx = c0 ? p.p[0] - c0.M[0] : 0, dy = c0 ? p.p[1] - c0.M[1] : 0, L = Math.hypot(dx, dy);
+          o = c0 && L > 1e-9 && p.name !== 'M' && p.name !== 'N' ? [dx / L * 14, -dy / L * 14 + 5] : [10, 15];
+        }
+        h += `<circle class="pt${p.drag ? ' drag' : ''}" cx="${n(px)}" cy="${n(py)}" r="${p.drag ? 7 : 3.4}"/>`;
+        if (p.name) h += `<text class="lab" text-anchor="middle" x="${n(px + o[0])}" y="${n(py + o[1])}">${p.name}</text>`;
+      });
+      if (sc.marker) { const px = n(X(sc.marker[0])), py = n(Y(sc.marker[1])); h += `<g class="marker" transform="translate(${px} ${py})"><circle r="8"/><path d="M-13 0h7M6 0h7M0-13v7M0 6v7"/></g>`; }
+      this.svg.innerHTML = h;
+    }
+    fire(lines, target, cb) {
+      const res = lines.map(ln => lineStatus(ln, target));
+      this.svg.insertAdjacentHTML('beforeend', `<g>${lines.map((ln, i) => this.lineTag(ln, 'beam fly', `pathLength="1" style="animation-delay:${i * 200}ms"`)).join('')}</g>`);
+      sfx.fire();
+      setTimeout(() => {
+        if (!this.scene) return;
+        this.scene.beams = (this.scene.beams || []).concat(lines.map((ln, i) => ({ ln, st: res[i].kind })));
+        this.draw();
+        const X = x => ((x - this.view[0]) * this.u).toFixed(1), Y = y => ((this.view[3] - y) * this.u).toFixed(1);
+        let h = '';
+        res.forEach(r => r.pts.forEach(p => {
+          if (r.kind === 'raak') h += `<g transform="translate(${X(p[0])} ${Y(p[1])})"><g class="spark">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => `<line x1="5" y1="0" x2="13" y2="0" transform="rotate(${a})"/>`).join('')}</g></g>`;
+          else h += `<circle class="hitdot" cx="${X(p[0])}" cy="${Y(p[1])}" r="4"/>`;
+        }));
+        this.svg.insertAdjacentHTML('beforeend', h);
+        cb(res);
+      }, RM ? 0 : 520 + 200 * (lines.length - 1));
+    }
+  }
+
+  /* ---------- missies ---------- */
+  const mth = s => s.replace(/rc_(\w)/g, '\u0001$1\u0002').replace(/([A-Za-z])/g, '<var>$1</var>').replace(/\^(\d)/g, '<sup>$1</sup>').replace(/_<var>(\w)<\/var>/g, '<sub><var>$1</var></sub>').replace(/_(\d)/g, '<sub>$1</sub>').replace(/\u0001<var>(\w)<\/var>\u0002/g, 'rc<sub><var>$1</var></sub>').replace(/√\{([^}]*)\}/g, '<span class="sqrt">√<span class="rad">$1</span></span>');
+  const rule = (s, note) => `<div class="rule">${mth(s)}${note ? ` <small>${note}</small>` : ''}</div>`;
+  const dfrac = (a, b) => `<span class="fr big"><span>${mth(a)}</span><span>${mth(b)}</span></span>`;
+  const LV = { core: 0, mid: 1, full: 2 };
+  const MISSIONS = [
+    {
+      id: 'm0', code: 'M0', name: 'Scan', sub: 'Middelpunt en straal aflezen', tag: 'Voorkennis', min: 3,
+      plan: [[gM0, 'int', 'full'], [gM0, 'int', 'mid'], [gM0, 'int', 'core'], [gM0, 'half', 'core']],
+      brief: `<p>Elk schild is een cirkel. Voor je iets kunt uitrekenen heb je twee dingen nodig: het middelpunt en de straal.</p>${rule('(x − a)^2 + (y − b)^2 = r^2', 'middelpunt (a, b), straal r')}<p>Let op de tekens: bij ${mth('(x + 3)^2')} hoort ${mth('x')} = −3. Rechts staat ${mth('r^2')}, dus trek nog de wortel.</p><p>Staat de vergelijking uitgeschreven? Splits dan kwadraten af:</p>${rule('x^2 − 10x = (x − 5)^2 − 25')}`,
+      sheet: [rule('(x − a)^2 + (y − b)^2 = r^2', 'middelpunt (a, b), straal r'), rule('x^2 + px = (x + ½p)^2 − (½p)^2', 'kwadraat afsplitsen')],
+    },
+    {
+      id: 'm1', code: 'M1', name: 'Afstand tot het schild', sub: 'Punt en cirkel', tag: 'Theorie A', min: 4, demo: 'm1',
+      plan: [[gM1, 'buiten', 'full'], [gM1, 'binnen', 'full'], [gM1, 'tapnear', 'full'], [gM1, 'tapdist', 'full'], [gM1, 'blind', 'core']],
+      brief: `<p>Hoe ver ligt een punt van het schild? De kortste weg naar een cirkel loopt altijd recht op het middelpunt af. Reken dus eerst de afstand tot ${mth('M')} uit.</p>${rule('d(A, c) = d(A, M) − r', 'A buiten de cirkel')}${rule('d(B, c) = r − d(B, M)', 'B binnen de cirkel')}<p>Sleep ${mth('A')} door het veld en kijk wat er met de formule gebeurt.</p>`,
+      sheet: [rule('d(A, M) = √{(x_A − x_M)^2 + (y_A − y_M)^2}'), rule('d(A, c) = d(A, M) − r', 'A buiten de cirkel'), rule('d(B, c) = r − d(B, M)', 'B binnen de cirkel')],
+    },
+    {
+      id: 'm2', code: 'M2', name: 'Tussenruimte', sub: 'Twee cirkels, lijn en cirkel', tag: 'Theorie A', min: 5,
+      plan: [[gM2, 'twee', 'full'], [gM2, 'in', 'full'], [gM2, 'lijnpos', 'full'], [gM2, 'lijndist', 'full'], [gM2, 'xas', 'full']],
+      brief: `<p>Ook tussen twee schilden, of tussen een lijn en een schild, loopt de kortste weg via de middelpunten.</p>${rule('d(c_1, c_2) = d(M, N) − r_1 − r_2', 'cirkels naast elkaar')}${rule('d(c, d) = r_c − d(M, N) − r_d', 'd ligt binnen c')}<p>Voor een lijn ${mth('k')}: ${mth('ax + by = c')} gebruik je de afstandsformule:</p><div class="rule">${mth('d(M, k)')} = ${dfrac('|ax_M + by_M − c|', '√{a^2 + b^2}')} <small>en dan</small> ${mth('d(k, c) = d(M, k) − r')}</div><p>Is ${mth('d(M, k)')} kleiner dan ${mth('r')}, dan snijdt de lijn de cirkel. Gelijk aan ${mth('r')}: de lijn raakt. Groter: de lijn mist.</p>`,
+      sheet: [rule('d(c_1, c_2) = d(M, N) − r_1 − r_2', 'cirkels naast elkaar'), rule('d(c, d) = r_c − d(M, N) − r_d', 'd ligt binnen c'), `<div class="rule">${mth('d(M, k)')} = ${dfrac('|ax_M + by_M − c|', '√{a^2 + b^2}')} <small>voor</small> ${mth('k')}: ${mth('ax + by = c')}</div>`, rule('d(k, c) = d(M, k) − r'), `<div class="rule">${mth('d(M, k) < r')} <small>snijdt</small> · ${mth('d(M, k) = r')} <small>raakt</small> · ${mth('d(M, k) > r')} <small>mist</small></div>`],
+    },
+    {
+      id: 'm3', code: 'M3', name: 'Schampschot', sub: 'Raaklijn in een gegeven raakpunt', tag: 'Theorie B', min: 5, demo: 'm3',
+      plan: [[gM3, 'std', 'full'], [gM3, 'std', 'mid'], [gM3, 'recht', 'full'], [gM3, 'std', 'core'], [gM3, 'xas', 'mid']],
+      brief: `<p>Een raaklijn staat loodrecht op de straal naar het raakpunt. Dat is het hele geheim. Sleep ${mth('A')} over de cirkel en zie het.</p><p>Werkschema voor de raaklijn ${mth('k')} in een punt ${mth('A')} op de cirkel:</p><ol><li>Bereken ${mth('rc_l')} van de lijn ${mth('l')} door ${mth('M')} en ${mth('A')}.</li><li>${mth('k')} ⊥ ${mth('l')}, dus ${mth('rc_k')} · ${mth('rc_l')} = −1.</li><li>Vul ${mth('A')} in ${mth('y = ax + b')} in om ${mth('b')} te vinden.</li></ol>`,
+      sheet: [`<div class="rule">1. ${mth('rc_l')} <small>van de lijn door M en A</small><br>2. ${mth('rc_k')} · ${mth('rc_l')} = −1<br>3. ${mth('A')} <small>invullen geeft</small> ${mth('b')}</div>`],
+    },
+    {
+      id: 'm4', code: 'M4', name: 'Vaste koers', sub: 'Raaklijnen met gegeven richtingscoëfficiënt', tag: 'Theorie C', min: 5,
+      plan: [[gM4, 'toon', 'full'], [gM4, 'int', 'full'], [gM4, 'int', 'mid'], [gM4, 'lood', 'mid'], [gM4, 'frac', 'core']],
+      brief: `<p>Nu ligt de richting van je schot vast en zoek je de hoogte ${mth('b')}. Een lijn raakt een cirkel precies als de afstand van het middelpunt tot de lijn gelijk is aan de straal.</p>${rule('d(M, k) = r')}<p>Stel ${mth('k')}: ${mth('y = ax + b')} en schrijf dat als ${mth('ax − y + b = 0')}. Dan:</p><div class="rule">${dfrac('|ax_M − y_M + b|', '√{a^2 + 1}')} = ${mth('r')}</div><p>De absolute waarde geeft twee oplossingen. Logisch: er passen altijd twee evenwijdige raaklijnen om een cirkel.</p>`,
+      sheet: [`<div class="rule">${mth('k')}: ${mth('y = ax + b')} <small>wordt</small> ${mth('ax − y + b = 0')}<br>${dfrac('|ax_M − y_M + b|', '√{a^2 + 1}')} = ${mth('r')} <small>geeft twee waarden van</small> ${mth('b')}</div>`, rule('k ∥ m: rc_k = rc_m', ''), rule('k ⊥ m: rc_k · rc_m = −1', '')],
+    },
+    {
+      id: 'm5', code: 'M5', name: 'Dubbelschot', sub: 'Raaklijnen door een punt buiten de cirkel', tag: 'Theorie C', min: 6, demo: 'm5',
+      plan: [[gM5, 'std', 'full'], [gM5, 'std', 'mid'], [gM5, 'std', 'core']],
+      brief: `<p>Vanuit een punt ${mth('A')} buiten de cirkel kun je twee schampschoten lossen. Sleep ${mth('A')} om ze te zien. Zo reken je ze uit:</p><ol><li>Stel ${mth('l')}: ${mth('y = ax + b')} en vul ${mth('A')} in. Dat geeft ${mth('b')} uitgedrukt in ${mth('a')}.</li><li>Gebruik ${mth('d(M, l) = r')}.</li><li>Kwadrateer en herleid op nul.</li><li>Los op met de abc-formule: twee waarden van ${mth('a')}.</li><li>Bereken bij elke ${mth('a')} de ${mth('b')}.</li></ol><p>Dit is de langste som van de paragraaf. In deze missie doe je hem eerst in kleine stappen.</p>`,
+      sheet: [`<div class="rule">1. ${mth('l')}: ${mth('y = ax + b')}, ${mth('A')} <small>invullen geeft</small> ${mth('b')} <small>in</small> ${mth('a')}<br>2. ${mth('d(M, l) = r')}<br>3. <small>kwadrateren, op nul herleiden</small><br>4. <small>abc-formule geeft twee waarden van</small> ${mth('a')}<br>5. <small>bij elke</small> ${mth('a')} <small>de</small> ${mth('b')}</div>`],
+    },
+  ];
+  const BOSS = { id: 'boss', code: 'EX', name: 'Toets-sim', sub: 'Zes opgaven zonder tussenstappen', min: 10, plan: [[gM0, 'half', 'core'], [gM1, 'blind', 'core'], [gM2, 'in', 'core'], [gM3, 'std', 'core'], [gM4, 'int', 'core'], [gM5, 'std', 'core']] };
+  const byId = id => (id === 'boss' ? BOSS : MISSIONS.find(m => m.id === id));
+
+  /* ---------- schermen ---------- */
+  const el = {};
+  ['status', 'missions', 'extras', 'soundBtn', 'resetBtn', 'briefCode', 'briefTitle', 'briefBody', 'briefStart', 'briefDemo', 'demoRead', 'hudCode', 'pips', 'combo', 'hudXp', 'verdict', 'scroll', 'given', 'log', 'step', 'fb', 'choices', 'pad', 'hintBtn', 'go', 'quit', 'resultCard', 'timeFill', 'rfScore', 'rfQ', 'rfOpts', 'rfCombo', 'sheet', 'sheetTitle', 'sheetBody'].forEach(k => { el[k] = $('#' + k); });
+  const field = new Field($('#field'), true), demo = new Field($('#demo')), hero = new Field($('#hero'));
+  let R = null, RF = null, heroRaf = 0;
+  function show(id) {
+    ['home', 'brief', 'play', 'result', 'reflex'].forEach(k => { $('#' + k).hidden = k !== id; });
+    document.body.classList.toggle('fixed', id === 'play');
+    demo.interact(null); window.scrollTo(0, 0);
+    if (id === 'home') { renderHome(); startHero(); } else cancelAnimationFrame(heroRaf);
+  }
+  const pips = (n, on, now) => `<span class="pips">${Array.from({ length: n }, (_, i) => `<i class="${i < on ? 'on' : i === now ? 'now' : ''}"></i>`).join('')}</span>`;
+
+  function renderHome() {
+    const rk = rank(store.xp), pct = rk.hi ? Math.round((store.xp - rk.lo) / (rk.hi - rk.lo) * 100) : 100;
+    el.status.innerHTML = `<span>Rang <b>${rk.name}</b></span><span class="xpbar"><i style="width:${pct}%"></i></span><span>${store.xp} XP${rk.next ? ` · nog ${rk.hi - store.xp} tot ${rk.next}` : ''}</span>${store.streak >= 2 ? `<span>${store.streak} dagen op rij</span>` : ''}`;
+    const nextId = (MISSIONS.find(m => !store.stars[m.id]) || {}).id;
+    el.missions.innerHTML = MISSIONS.map(m => `<li><button type="button" class="mission${m.id === nextId ? ' next' : ''}" data-m="${m.id}"><span class="code">${m.code}</span><span><b>${m.name}</b><small>${m.sub}</small></span><span class="meta">${pips(3, store.stars[m.id] || 0, -1)}<small>${m.tag} · ± ${m.min} min</small></span></button></li>`).join('');
+    el.extras.innerHTML = `<button type="button" class="mission" data-x="reflex"><span class="code">RX</span><span><b>Reflextest</b><small>60 seconden, zoveel mogelijk goed</small></span><span class="meta"><small>${store.best ? `Record ${store.best}` : 'Nog geen record'}</small></span></button><button type="button" class="mission" data-m="boss"><span class="code">EX</span><span><b>${BOSS.name}</b><small>${BOSS.sub}</small></span><span class="meta">${pips(3, store.stars.boss || 0, -1)}<small>± ${BOSS.min} min</small></span></button>`;
+    el.soundBtn.textContent = store.sound ? 'Geluid uit' : 'Geluid aan';
+  }
+  function startHero() {
+    const sc = { bare: true, circles: [{ M: [0, 0], r: 3 }], points: [{ p: [3, 0] }], lines: [{ p: [0, 0], q: [1, 1] }], segs: [{ p: [0, 0], q: [3, 0] }], beams: [] };
+    let th = 0.9, last = 0;
+    const put = () => { const A = [3 * Math.cos(th), 3 * Math.sin(th)]; sc.points[0].p = A; sc.segs[0].q = A; sc.lines = []; sc.beams = [{ ln: { p: A, q: [A[0] - Math.sin(th), A[1] + Math.cos(th)] }, st: 'raak' }]; sc.right = [{ at: A, u: [-Math.cos(th), -Math.sin(th)], v: [-Math.sin(th), Math.cos(th)] }]; };
+    put(); hero.set(sc, [-6, 6, -6, 6]);
+    cancelAnimationFrame(heroRaf);
+    if (RM) return;
+    const tick = t => { if (t - last > 40) { th += 0.012; last = t; put(); hero.draw(); } heroRaf = requestAnimationFrame(tick); };
+    heroRaf = requestAnimationFrame(tick);
+  }
+
+  /* ---------- briefing en proefvelden ---------- */
+  const DEMOS = {
+    m1() {
+      const M = [4, 3], r = 3; let A = [8, 7];
+      const sc = { circles: [{ M, r, name: 'c' }], points: [{ p: M, name: 'M' }, { p: A, name: 'A', drag: true }], lines: [], segs: [{ p: A, q: M }] };
+      const upd = () => {
+        sc.points[1].p = A; sc.segs[0].p = A; demo.draw();
+        const d2 = (A[0] - M[0]) ** 2 + (A[1] - M[1]) ** 2, d = Math.sqrt(d2), dAM = mth('d(A, M)'), dAc = mth('d(A, c)');
+        el.demoRead.innerHTML = d > r ? `<small>A ligt buiten c</small>${dAc} = ${dAM} − ${mth('r')} = ${rt(d2)} − 3${isSq(d2) ? '' : ` ≈ ${fdec(d - r, 2)}`}` : d < r ? `<small>A ligt binnen c</small>${dAc} = ${mth('r')} − ${dAM} = 3 − ${rt(d2)}${isSq(d2) ? '' : ` ≈ ${fdec(r - d, 2)}`}` : `<small>A ligt op c</small>${dAc} = 0`;
+      };
+      demo.set(sc, [-2, 10, -3, 9]); demo.interact('drag', m => { A = [clamp(Math.round(m[0]), -1, 9), clamp(Math.round(m[1]), -2, 8)]; upd(); }); upd();
+    },
+    m3() {
+      const M = [4, 3], r = 3; let th = 0.9;
+      const sc = { circles: [{ M, r, name: 'c' }], points: [{ p: M, name: 'M' }, { p: M, name: 'A', drag: true }], lines: [{ p: M, q: M, name: 'k' }], segs: [{ p: M, q: M, name: 'l' }] };
+      const upd = () => {
+        const c = Math.cos(th), s = Math.sin(th), A = [M[0] + r * c, M[1] + r * s];
+        sc.points[1].p = A; sc.segs[0].q = A; sc.lines[0].p = A; sc.lines[0].q = [A[0] - s, A[1] + c]; sc.right = [{ at: A, u: [-c, -s], v: [-s, c] }]; demo.draw();
+        const steep = Math.abs(c) < 0.06, flat = Math.abs(s) < 0.06;
+        el.demoRead.innerHTML = steep ? `<small>l is verticaal</small>De raaklijn ${mth('k')} is dan horizontaal.` : flat ? `<small>l is horizontaal</small>De raaklijn ${mth('k')} is dan verticaal en heeft geen rc.` : `<small>k staat loodrecht op l</small>${mth('rc_l')} ≈ ${fdec(s / c, 2)} en ${mth('rc_k')} ≈ ${fdec(-c / s, 2)}, samen ${mth('rc_k')} · ${mth('rc_l')} = −1`;
+      };
+      demo.set(sc, [-2, 10, -3, 9]); demo.interact('drag', m => { th = Math.atan2(m[1] - M[1], m[0] - M[0]); upd(); }); upd();
+    },
+    m5() {
+      const M = [3, 3], r = 2.5; let A = [9, 5];
+      const sc = { circles: [{ M, r, name: 'c' }], points: [{ p: M, name: 'M' }, { p: A, name: 'A', drag: true }], lines: [], segs: [] };
+      const upd = () => {
+        sc.points[1].p = A; const d = Math.hypot(A[0] - M[0], A[1] - M[1]), phi = Math.atan2(A[1] - M[1], A[0] - M[0]);
+        sc.beams = []; sc.segs = []; sc.right = [];
+        if (d > r + 1e-9) { const al = Math.acos(r / d); [phi + al, phi - al].forEach(t => { const T = [M[0] + r * Math.cos(t), M[1] + r * Math.sin(t)]; sc.beams.push({ ln: { p: A, q: T }, st: 'raak' }); sc.segs.push({ p: M, q: T }); }); }
+        demo.draw();
+        el.demoRead.innerHTML = d > r + 1e-9 ? `<small>A ligt buiten c</small>Twee raaklijnen door ${mth('A')}. Beide stralen staan loodrecht op hun raaklijn.` : d < r - 1e-9 ? `<small>A ligt binnen c</small>Geen enkele lijn door ${mth('A')} raakt de cirkel.` : `<small>A ligt op c</small>Precies één raaklijn.`;
+      };
+      demo.set(sc, [-2, 10, -3, 9]); demo.interact('drag', m => { A = [clamp(Math.round(m[0] * 2) / 2, -1.5, 9.5), clamp(Math.round(m[1] * 2) / 2, -2.5, 8.5)]; upd(); }); upd();
+    },
+  };
+  function openMission(id) {
+    const m = byId(id);
+    if (!m.brief) return startMission(m);
+    el.briefCode.textContent = `${m.code} · ${m.tag}`; el.briefTitle.textContent = m.name; el.briefBody.innerHTML = m.brief;
+    el.briefStart.onclick = () => startMission(m);
+    show('brief');
+    el.briefDemo.hidden = !m.demo; if (m.demo) DEMOS[m.demo]();
+  }
+
+  /* ---------- een missie spelen ---------- */
+  function startMission(m) { R = { m, plan: m.plan, ri: -1, first: 0, total: 0, gained: 0, combo: 0 }; show('play'); nextRound(); }
+  function hud() {
+    if (!R) return;
+    el.hudCode.textContent = `${R.m.code} · ronde ${Math.min(R.ri + 1, R.plan.length)}/${R.plan.length}`;
+    el.pips.innerHTML = pips(R.plan.length, R.ri, R.ri).replace(/^<span class="pips">|<\/span>$/g, '');
+    el.combo.textContent = R.combo >= 2 ? `reeks ${R.combo}` : '';
+    el.hudXp.textContent = `${store.xp} XP`;
+  }
+  function addXp(g) { store.xp += g; if (R) R.gained += g; save(); hud(); el.hudXp.classList.remove('bump'); void el.hudXp.offsetWidth; el.hudXp.classList.add('bump'); }
+  const scrollDown = () => { el.scroll.scrollTop = Math.max(0, el.step.offsetTop - el.scroll.offsetTop - 4); };
+  function fb(kind, html, title) { el.fb.className = 'fb ' + kind; el.fb.innerHTML = `<span class="fbt">${title || ''}</span>${html}`; el.fb.hidden = false; scrollDown(); }
+  function flash(text) { el.verdict.textContent = text; el.verdict.hidden = false; clearTimeout(flash.t); flash.t = setTimeout(() => { el.verdict.hidden = true; }, 1500); }
+
+  function nextRound() {
+    R.ri++;
+    if (R.ri >= R.plan.length) return finish();
+    const [gen, variant, mode] = R.plan[R.ri];
+    R.prob = gen(variant); R.steps = R.prob.steps.filter(s => s.lvl <= LV[mode]); R.si = 0;
+    el.given.innerHTML = R.prob.given; el.log.innerHTML = ''; el.scroll.scrollTop = 0;
+    field.set(R.prob.scene); hud(); renderStep();
+  }
+  function renderStep() {
+    const st = R.steps[R.si];
+    Object.assign(R, { st, tries: 0, hinted: false, phase: 'answer', busy: false, vals: st.type === 'input' ? st.slots.map(() => '') : [], active: 0 });
+    el.fb.hidden = true; field.interact(null);
+    el.pad.hidden = st.type !== 'input'; el.choices.hidden = st.type !== 'choice'; el.go.hidden = st.type === 'choice';
+    el.hintBtn.hidden = false; el.hintBtn.textContent = 'Hint';
+    el.go.textContent = st.fire ? 'Vuur' : 'Check'; el.go.classList.toggle('fire', !!st.fire);
+    if (st.type === 'input') { el.step.innerHTML = `<p class="eq">${st.prompt.replace(/\{(\d)\}/g, (m, i) => `<button type="button" class="slot" data-i="${i}" aria-label="Invulvak ${+i + 1}"></button>`)}</p>`; paintSlots(); }
+    else if (st.type === 'choice') { el.step.innerHTML = `<p class="ask">${st.prompt}</p>`; el.choices.innerHTML = st.choices.map((c, i) => `<button type="button" class="opt" data-i="${i}"><span class="k">${i + 1}</span><span>${c.html}</span></button>`).join(''); }
+    else {
+      el.step.innerHTML = `<p class="ask">${st.prompt}</p><p class="note">Tik op een roosterpunt in het veld en druk op Check.</p>`;
+      const sc = R.prob.scene; sc.marker = null;
+      field.interact('tap', m => { const p = [Math.round(m[0]), Math.round(m[1])]; if (!sc.marker || sc.marker[0] !== p[0] || sc.marker[1] !== p[1]) { sc.marker = p; field.draw(); sfx.key(); } });
+    }
+    scrollDown();
+  }
+  function paintSlots(reveal) {
+    $$('#step .slot').forEach(b => {
+      const i = +b.dataset.i;
+      if (reveal) { b.innerHTML = R.st.slots[i].show; b.classList.add('shown'); b.classList.remove('on'); }
+      else { b.textContent = R.vals[i]; b.classList.toggle('on', i === R.active); }
+    });
+  }
+  function shake(i) { const b = $$('#step .slot')[i]; if (!b) return; b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); }
+  function key(k) {
+    if (!R || R.phase !== 'answer' || R.st.type !== 'input' || R.busy) return;
+    let t = R.vals[R.active];
+    if (k === '⌫') t = t.slice(0, -1); else if (t.length < 12) t += k;
+    R.vals[R.active] = t; paintSlots(); sfx.key();
+  }
+  const logBody = st => (st.log ? st.log : st.type === 'input' ? st.prompt.replace(/\{(\d)\}/g, (m, i) => `<b>${st.slots[i].show}</b>`) : st.type === 'choice' ? `${st.short || st.prompt} <b>${st.choices.find(c => c.ok).html}</b>` : `${st.short || st.prompt} <b>${st.ansHtml}</b>`);
+  function verdict(stats, st) {
+    for (const s of stats) {
+      if (s.kind === 'snijdt') return 'Je lijn gaat dwars door het schild: de afstand van <var>M</var> tot je lijn is kleiner dan de straal.';
+      if (s.kind === 'mist') return 'Je lijn mist het schild: de afstand van <var>M</var> tot je lijn is groter dan de straal.';
+      if (!s.through) return `Je lijn raakt de cirkel wel, maar gaat niet door <var>${st.target.pt}</var>.`;
+    }
+    return 'Dit zijn niet twee verschillende raaklijnen.';
+  }
+  function onGo() {
+    if (!R || R.busy) return;
+    if (R.phase === 'next') return advance(true);
+    if (R.phase === 'round') return nextRound();
+    const st = R.st, sc = R.prob.scene;
+    if (st.type === 'tap') { if (!sc.marker) return fb('note', 'Tik eerst een roosterpunt aan in het veld.'); return st.test(sc.marker) ? correct() : wrong(); }
+    if (st.type !== 'input') return;
+    const empty = R.vals.findIndex(t => !t);
+    if (empty >= 0) { if (empty === R.active) shake(empty); R.active = empty; paintSlots(); return; }
+    const vals = R.vals.map(evalExpr), bad = vals.findIndex(x => !isFinite(x));
+    if (bad >= 0) { R.active = bad; paintSlots(); shake(bad); return fb('note', 'Dat kan ik niet lezen. Gebruik cijfers, een minteken, een komma, / voor een breuk en √ voor een wortel.'); }
+    const res = checkInput(st, vals);
+    if (st.fire && !res.near) {
+      R.busy = true; sc.beams = []; field.draw();
+      field.fire(st.fire(vals), st.target, stats => { R.busy = false; if (res.ok) { sfx.hit(); flash('Schampschot'); correct(); } else wrong(verdict(stats, st)); });
+      return;
+    }
+    if (res.ok) return correct();
+    if (res.near) return fb('note', 'Bijna. Geef het exacte antwoord: laat de wortel staan of gebruik een breuk in plaats van een afgerond getal.');
+    wrong();
+  }
+  function wrong(extra) {
+    const st = R.st; R.tries++; R.combo = 0; sfx.bad(); hud();
+    if (R.tries >= 2) return reveal(extra);
+    fb('hint', `${extra ? extra + '<br>' : ''}${st.hint}`, 'Nog niet goed');
+  }
+  function reveal(extra) {
+    const st = R.st, sc = R.prob.scene; R.phase = 'next'; field.interact(null);
+    if (st.type === 'input') { paintSlots(true); if (st.fire) { sc.beams = []; field.draw(); R.busy = true; field.fire(st.fire(st.slots.map(s => s.v)), st.target, () => { R.busy = false; }); } }
+    if (st.type === 'choice') $$('#choices .opt').forEach((b, i) => { b.disabled = true; if (st.choices[i].ok) b.classList.add('right'); });
+    if (st.type === 'tap') { sc.marker = st.answer; field.draw(); }
+    fb('uitleg', `${extra ? extra + '<br>' : ''}${st.uitleg}`, 'Zo zit het');
+    el.go.hidden = false; el.go.textContent = 'Verder'; el.go.classList.remove('fire'); el.hintBtn.hidden = true; el.pad.hidden = true;
+  }
+  function correct() {
+    const st = R.st, firstTry = R.tries === 0 && !R.hinted;
+    if (firstTry) { R.first++; R.combo++; } else R.combo = 0;
+    const mult = 1 + Math.min(3, Math.floor(R.combo / 3)) * 0.5;
+    addXp(Math.round((firstTry ? 10 : 5) * mult) + (st.fire ? 5 : 0));
+    if (!st.fire) sfx.ok();
+    advance(false);
+  }
+  function advance(missed) {
+    const st = R.st, sc = R.prob.scene; R.total++;
+    el.log.insertAdjacentHTML('beforeend', `<li class="${missed ? 'miss' : ''}">${logBody(st)}</li>`);
+    if (st.after) st.after(sc);
+    sc.marker = null; field.draw();
+    if (st.showLines) field.fire(st.showLines, st.target, () => {});
+    R.si++;
+    if (R.si < R.steps.length) return renderStep();
+    R.phase = 'round'; field.interact(null); el.fb.hidden = true; el.pad.hidden = true; el.choices.hidden = true;
+    el.step.innerHTML = `<p class="done">Ronde ${R.ri + 1} van ${R.plan.length} klaar.</p>`;
+    el.go.hidden = false; el.go.classList.remove('fire'); el.go.textContent = R.ri === R.plan.length - 1 ? 'Afronden' : 'Volgende ronde';
+    el.hintBtn.hidden = false; el.hintBtn.textContent = 'Uitwerking';
+    hud(); el.scroll.scrollTop = el.scroll.scrollHeight;
+  }
+  function onOpt(i) {
+    if (!R || R.phase !== 'answer' || R.busy) return;
+    const st = R.st, c = st.choices[i], bs = $$('#choices .opt'), b = bs[i];
+    if (!c || b.disabled) return;
+    if (c.ok) { b.classList.add('right'); bs.forEach(x => { x.disabled = true; }); R.busy = true; setTimeout(() => { R.busy = false; correct(); }, RM ? 0 : 320); return; }
+    b.classList.add('wrong'); b.disabled = true; R.tries++; R.combo = 0; sfx.bad(); hud();
+    if (R.tries >= 2 || st.choices.length <= 2) reveal(c.why); else fb('hint', c.why || st.hint, 'Nog niet goed');
+  }
+  function onHint() {
+    if (!R) return;
+    if (R.phase === 'round') return openSheet('Uitwerking', `<p class="given">${R.prob.given}</p><ol class="sol">${R.prob.steps.map(st => `<li>${logBody(st)}<div class="why">${st.uitleg}</div></li>`).join('')}</ol>`);
+    if (R.phase !== 'answer') return;
+    R.hinted = true; fb('hint', R.st.hint, 'Hint');
+  }
+  function finish() {
+    const acc = R.total ? R.first / R.total : 0, stars = acc >= 0.9 ? 3 : acc >= 0.65 ? 2 : 1, id = R.m.id, m = R.m;
+    store.stars[id] = Math.max(store.stars[id] || 0, stars); dayStreak(); store.xp += 20 * stars; R.gained += 20 * stars; save(); sfx.win();
+    const idx = MISSIONS.indexOf(m), nx = idx >= 0 && idx < MISSIONS.length - 1 ? MISSIONS[idx + 1] : idx === MISSIONS.length - 1 ? BOSS : null;
+    const title = stars === 3 ? 'Schild uitgeschakeld' : stars === 2 ? 'Missie geslaagd' : 'Missie afgerond';
+    const tip = stars === 3 ? 'Vrijwel alles in één keer goed. Deze stof zit erin.' : stars === 2 ? 'Goed bezig. Nog een rondje en het zit er helemaal in.' : 'Je hebt de stappen nu gezien. Speel hem nog een keer, dan gaat het al veel sneller.';
+    showResult({ eyebrow: `${m.code} · ${m.name}`, title, stars, facts: [['In één keer goed', `${R.first}/${R.total}`], ['XP verdiend', `+${R.gained}`], ['Rang', rank(store.xp).name]], tip, again: () => openMission(id), next: nx ? [`Door naar ${nx.code}`, () => openMission(nx.id)] : null });
+    R = null;
+  }
+  function showResult(o) {
+    el.resultCard.innerHTML = `<p class="eyebrow">${o.eyebrow}</p><h2>${o.title}</h2>${o.stars ? pips(3, o.stars, -1) : ''}<dl class="facts">${o.facts.map(f => `<div><dt>${f[0]}</dt><dd>${f[1]}</dd></div>`).join('')}</dl><p class="sub">${o.tip}</p><div class="row"><button type="button" class="btn sec" id="resAgain">Nog een keer</button><button type="button" class="btn pri" id="resNext">${o.next ? o.next[0] : 'Naar de basis'}</button></div>${o.next ? '<button type="button" class="link" data-home>Terug naar de basis</button>' : ''}`;
+    $('#resAgain').onclick = o.again; $('#resNext').onclick = o.next ? o.next[1] : () => show('home');
+    show('result');
+  }
+
+  /* ---------- reflextest ---------- */
+  function startReflex() {
+    RF = { t: 60, score: 0, combo: 0, lock: false };
+    el.rfScore.textContent = '0'; el.rfCombo.textContent = ''; el.timeFill.style.transform = 'scaleX(1)';
+    show('reflex'); rfNext();
+    RF.iv = setInterval(() => { if (!RF) return; RF.t -= 0.1; el.timeFill.style.transform = `scaleX(${Math.max(0, RF.t / 60)})`; if (RF.t <= 0) rfEnd(); }, 100);
+  }
+  function rfNext() { if (!RF) return; RF.q = reflexQ(); el.rfQ.innerHTML = RF.q.q; el.rfOpts.innerHTML = RF.q.opts.map((o, i) => `<button type="button" class="opt" data-i="${i}"><span class="k">${i + 1}</span><span>${o.html}</span></button>`).join(''); RF.lock = false; }
+  function rfPick(i) {
+    if (!RF || RF.lock) return; const o = RF.q.opts[i]; if (!o) return;
+    RF.lock = true; const bs = $$('#rfOpts .opt');
+    if (o.ok) { RF.score++; RF.combo++; bs[i].classList.add('right'); sfx.ok(); setTimeout(rfNext, RM ? 0 : 200); }
+    else { RF.combo = 0; bs[i].classList.add('wrong'); bs[RF.q.opts.findIndex(x => x.ok)].classList.add('right'); sfx.bad(); setTimeout(rfNext, 1200); }
+    el.rfScore.textContent = RF.score; el.rfCombo.textContent = RF.combo >= 3 ? `reeks ${RF.combo}` : '';
+  }
+  function stopReflex() { if (RF) { clearInterval(RF.iv); RF = null; } }
+  function rfEnd() {
+    const s = RF.score, rec = s > store.best; stopReflex();
+    if (rec) store.best = s; store.xp += s * 3; dayStreak(); save(); sfx.win();
+    showResult({ eyebrow: 'RX · Reflextest', title: rec ? 'Nieuw record' : 'Tijd om', stars: 0, facts: [['Goed', String(s)], ['Record', String(store.best)], ['XP verdiend', `+${s * 3}`]], tip: 'Snel herkennen welke formule je nodig hebt scheelt op de toets veel tijd.', again: startReflex, next: null });
+  }
+
+  /* ---------- spiekbrief ---------- */
+  function openSheet(title, html) { el.sheetTitle.textContent = title; el.sheetBody.innerHTML = html; el.sheet.hidden = false; el.sheet.firstElementChild.scrollTop = 0; }
+  const cheat = () => openSheet('Spiekbrief', MISSIONS.map(m => `<h3>${m.code} · ${m.sub}</h3><div class="prose">${m.sheet.join('')}</div>`).join(''));
+
+  /* ---------- bediening ---------- */
+  el.pad.innerHTML = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '−', ',', '/', '√', '⌫'].map(k => `<button type="button" data-k="${k}"${/\d/.test(k) ? '' : ' class="fn"'}${k === '⌫' ? ' aria-label="Wissen"' : ''}>${k}</button>`).join('');
+  el.pad.addEventListener('click', e => { const b = e.target.closest('[data-k]'); if (b) key(b.dataset.k); });
+  el.step.addEventListener('click', e => { const b = e.target.closest('.slot'); if (b && R && R.phase === 'answer') { R.active = +b.dataset.i; paintSlots(); } });
+  el.choices.addEventListener('click', e => { const b = e.target.closest('.opt'); if (b) onOpt(+b.dataset.i); });
+  el.rfOpts.addEventListener('click', e => { const b = e.target.closest('.opt'); if (b) rfPick(+b.dataset.i); });
+  el.go.addEventListener('click', onGo); el.hintBtn.addEventListener('click', onHint);
+  $('#openSheet').addEventListener('click', cheat); $('#sheetBtn').addEventListener('click', cheat);
+  $('#sheetClose').addEventListener('click', () => { el.sheet.hidden = true; });
+  el.sheet.addEventListener('click', e => { if (e.target === el.sheet) el.sheet.hidden = true; });
+  el.soundBtn.addEventListener('click', () => { store.sound = !store.sound; save(); renderHome(); if (store.sound) sfx.ok(); });
+  let armReset = 0, armQuit = 0;
+  el.resetBtn.addEventListener('click', () => {
+    if (Date.now() - armReset < 4000) { Object.assign(store, { xp: 0, stars: {}, best: 0, day: '', streak: 0 }); save(); armReset = 0; el.resetBtn.textContent = 'Voortgang wissen'; renderHome(); return; }
+    armReset = Date.now(); el.resetBtn.textContent = 'Zeker weten? Tik nog een keer'; setTimeout(() => { if (armReset) { armReset = 0; el.resetBtn.textContent = 'Voortgang wissen'; } }, 4000);
+  });
+  el.quit.addEventListener('click', () => {
+    if (Date.now() - armQuit < 3000) { armQuit = 0; el.quit.textContent = '✕'; R = null; show('home'); return; }
+    armQuit = Date.now(); el.quit.textContent = 'Stoppen?'; setTimeout(() => { armQuit = 0; el.quit.textContent = '✕'; }, 3000);
+  });
+  document.addEventListener('click', e => {
+    const m = e.target.closest('[data-m]'); if (m) return openMission(m.dataset.m);
+    if (e.target.closest('[data-x="reflex"]')) return startReflex();
+    if (e.target.closest('[data-home]')) { stopReflex(); R = null; show('home'); }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (!el.sheet.hidden) { if (e.key === 'Escape') el.sheet.hidden = true; return; }
+    if (RF && /^[1-4]$/.test(e.key)) return rfPick(+e.key - 1);
+    if (!R || $('#play').hidden) return;
+    if (e.key === 'Enter') { e.preventDefault(); if (!el.go.hidden) onGo(); return; }
+    if (R.phase !== 'answer') return;
+    const st = R.st;
+    if (st.type === 'choice' && /^[1-4]$/.test(e.key)) return onOpt(+e.key - 1);
+    if (st.type !== 'input') return;
+    const map = { '-': '−', ',': ',', '.': ',', '/': '/', '+': '+', r: '√', w: '√', s: '√', '(': '(', ')': ')' };
+    if (/^\d$/.test(e.key)) key(e.key);
+    else if (map[e.key]) key(map[e.key]);
+    else if (e.key === 'Backspace') { e.preventDefault(); key('⌫'); }
+    else if (e.key === 'Tab' || e.key === 'ArrowRight' || e.key === 'ArrowLeft') { e.preventDefault(); const n = st.slots.length; R.active = (R.active + (e.key === 'ArrowLeft' || e.shiftKey ? n - 1 : 1)) % n; paintSlots(); }
+  });
+
+  window.__schampschot = { store, field, get R() { return R; }, openMission, startMission, byId, startReflex };
+  show('home');
+})();
+</script>
+</body>
+</html>

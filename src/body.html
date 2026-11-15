@@ -1,0 +1,90 @@
+<div class="app">
+  <section id="home" class="screen">
+    <header class="mast">
+      <div>
+        <p class="eyebrow">Wiskunde B · hoofdstuk 7.4</p>
+        <h1>Schampschot</h1>
+        <p class="lead">Elke cirkel is een schild. Een voltreffer ketst af. Alleen een lijn die de cirkel precies raakt schakelt het uit. Reken die lijn uit en vuur.</p>
+      </div>
+      <svg id="hero" class="hero" aria-hidden="true"></svg>
+    </header>
+    <div class="status" id="status"></div>
+    <h2>Missies</h2>
+    <ol class="missions" id="missions"></ol>
+    <h2>Extra</h2>
+    <div class="extras" id="extras"></div>
+    <footer class="foot">
+      <button type="button" id="sheetBtn" class="link">Spiekbrief</button>
+      <button type="button" id="soundBtn" class="link"></button>
+      <button type="button" id="resetBtn" class="link">Voortgang wissen</button>
+    </footer>
+  </section>
+
+  <section id="brief" class="screen" hidden>
+    <div class="hud"><button type="button" class="ghost" data-home>← Basis</button></div>
+    <div class="brief-grid">
+      <div class="brief-txt">
+        <p class="eyebrow" id="briefCode"></p>
+        <h2 id="briefTitle"></h2>
+        <div id="briefBody" class="prose"></div>
+        <button type="button" id="briefStart" class="btn pri">Start missie</button>
+      </div>
+      <div class="brief-demo" id="briefDemo">
+        <svg id="demo" class="field" role="img" aria-label="Proefveld"></svg>
+        <p id="demoRead" class="read"></p>
+      </div>
+    </div>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="hud">
+      <button type="button" id="quit" class="ghost" aria-label="Stoppen">✕</button>
+      <div class="hud-mid"><span id="hudCode"></span><span id="pips" class="pips"></span></div>
+      <div class="hud-r"><span id="combo"></span><span id="hudXp"></span><button type="button" id="openSheet" class="ghost">Spiekbrief</button></div>
+    </div>
+    <div class="stage">
+      <div class="fieldbox">
+        <svg id="field" class="field" role="img" aria-label="Assenstelsel met de opgave"></svg>
+        <div id="verdict" class="verdict" hidden></div>
+      </div>
+      <div class="panel">
+        <div class="scroll" id="scroll">
+          <p id="given" class="given"></p>
+          <ol id="log" class="log"></ol>
+          <div id="step" class="step"></div>
+          <div id="fb" class="fb" hidden></div>
+        </div>
+        <div id="choices" class="choices" hidden></div>
+        <div id="pad" class="pad" hidden></div>
+        <div class="actions">
+          <button type="button" id="hintBtn" class="btn sec">Hint</button>
+          <button type="button" id="go" class="btn pri">Check</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <div class="result-card" id="resultCard"></div>
+  </section>
+
+  <section id="reflex" class="screen" hidden>
+    <div class="hud">
+      <button type="button" class="ghost" data-home aria-label="Stoppen">✕</button>
+      <div class="timebar"><i id="timeFill"></i></div>
+      <span id="rfScore" class="score">0</span>
+    </div>
+    <div class="rf-body">
+      <p id="rfQ" class="rf-q"></p>
+      <div id="rfOpts" class="choices"></div>
+      <p id="rfCombo" class="rf-combo"></p>
+    </div>
+  </section>
+
+  <div id="sheet" class="overlay" hidden>
+    <div class="sheet-card" role="dialog" aria-labelledby="sheetTitle">
+      <div class="sheet-head"><h2 id="sheetTitle">Spiekbrief</h2><button type="button" id="sheetClose" class="ghost" aria-label="Sluiten">✕</button></div>
+      <div id="sheetBody"></div>
+    </div>
+  </div>
+</div>
