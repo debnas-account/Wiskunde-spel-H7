@@ -1,0 +1,396 @@
+[
+ {
+  "id": "s1",
+  "take": "a",
+  "text": "Wiskunde B stampen uit je boek? Kan. Maar schieten is leuker.",
+  "start": 0.0,
+  "end": 4.76,
+  "dur": 4.76,
+  "words": [
+   {
+    "w": "Wiskunde",
+    "t": 0.0
+   },
+   {
+    "w": "B",
+    "t": 0.6
+   },
+   {
+    "w": "stampen",
+    "t": 0.773
+   },
+   {
+    "w": "uit",
+    "t": 1.14
+   },
+   {
+    "w": "je",
+    "t": 1.253
+   },
+   {
+    "w": "boek?",
+    "t": 1.387
+   },
+   {
+    "w": "Kan.",
+    "t": 1.88
+   },
+   {
+    "w": "Maar",
+    "t": 2.688
+   },
+   {
+    "w": "schieten",
+    "t": 3.24
+   },
+   {
+    "w": "is",
+    "t": 3.733
+   },
+   {
+    "w": "leuker.",
+    "t": 4.048
+   }
+  ]
+ },
+ {
+  "id": "s2",
+  "take": "a",
+  "text": "Dit is Schampschot. Elke cirkel is een schild. Een voltreffer ketst af.",
+  "start": 4.85,
+  "end": 9.68,
+  "dur": 4.83,
+  "words": [
+   {
+    "w": "Dit",
+    "t": 0.0
+   },
+   {
+    "w": "is",
+    "t": 0.35
+   },
+   {
+    "w": "Schampschot.",
+    "t": 0.55
+   },
+   {
+    "w": "Elke",
+    "t": 1.443
+   },
+   {
+    "w": "cirkel",
+    "t": 2.19
+   },
+   {
+    "w": "is",
+    "t": 2.537
+   },
+   {
+    "w": "een",
+    "t": 2.61
+   },
+   {
+    "w": "schild.",
+    "t": 2.71
+   },
+   {
+    "w": "Een",
+    "t": 3.37
+   },
+   {
+    "w": "voltreffer",
+    "t": 3.61
+   },
+   {
+    "w": "ketst",
+    "t": 4.17
+   },
+   {
+    "w": "af.",
+    "t": 4.59
+   }
+  ]
+ },
+ {
+  "id": "s3",
+  "take": "a",
+  "text": "Alleen een lijn die de cirkel precies raakt, schakelt het uit. Dus: reken hem uit, en vuur!",
+  "start": 9.867,
+  "end": 16.56,
+  "dur": 6.693,
+  "words": [
+   {
+    "w": "Alleen",
+    "t": 0.0
+   },
+   {
+    "w": "een",
+    "t": 0.573
+   },
+   {
+    "w": "lijn",
+    "t": 0.753
+   },
+   {
+    "w": "die",
+    "t": 1.053
+   },
+   {
+    "w": "de",
+    "t": 1.2
+   },
+   {
+    "w": "cirkel",
+    "t": 1.293
+   },
+   {
+    "w": "precies",
+    "t": 1.621
+   },
+   {
+    "w": "raakt,",
+    "t": 2.026
+   },
+   {
+    "w": "schakelt",
+    "t": 2.413
+   },
+   {
+    "w": "het",
+    "t": 2.813
+   },
+   {
+    "w": "uit.",
+    "t": 2.993
+   },
+   {
+    "w": "Dus:",
+    "t": 3.533
+   },
+   {
+    "w": "reken",
+    "t": 4.48
+   },
+   {
+    "w": "hem",
+    "t": 4.873
+   },
+   {
+    "w": "uit,",
+    "t": 4.993
+   },
+   {
+    "w": "en",
+    "t": 5.413
+   },
+   {
+    "w": "vuur!",
+    "t": 5.946
+   }
+  ]
+ },
+ {
+  "id": "s4",
+  "take": "a",
+  "text": "Mis? Dan zie je meteen waarom, en krijg je een hint.",
+  "start": 16.84,
+  "end": 20.56,
+  "dur": 3.72,
+  "words": [
+   {
+    "w": "Mis?",
+    "t": 0.0
+   },
+   {
+    "w": "Dan",
+    "t": 1.34
+   },
+   {
+    "w": "zie",
+    "t": 1.68
+   },
+   {
+    "w": "je",
+    "t": 1.827
+   },
+   {
+    "w": "meteen",
+    "t": 1.92
+   },
+   {
+    "w": "waarom,",
+    "t": 2.232
+   },
+   {
+    "w": "en",
+    "t": 2.787
+   },
+   {
+    "w": "krijg",
+    "t": 2.872
+   },
+   {
+    "w": "je",
+    "t": 3.107
+   },
+   {
+    "w": "een",
+    "t": 3.18
+   },
+   {
+    "w": "hint.",
+    "t": 3.304
+   }
+  ]
+ },
+ {
+  "id": "s5",
+  "take": "a",
+  "text": "Korte missies. Punten scoren. Steeds een rang hoger.",
+  "start": 20.96,
+  "end": 24.88,
+  "dur": 3.92,
+  "words": [
+   {
+    "w": "Korte",
+    "t": 0.0
+   },
+   {
+    "w": "missies.",
+    "t": 0.608
+   },
+   {
+    "w": "Punten",
+    "t": 1.22
+   },
+   {
+    "w": "scoren.",
+    "t": 1.747
+   },
+   {
+    "w": "Steeds",
+    "t": 2.36
+   },
+   {
+    "w": "een",
+    "t": 3.0
+   },
+   {
+    "w": "rang",
+    "t": 3.168
+   },
+   {
+    "w": "hoger.",
+    "t": 3.44
+   }
+  ]
+ },
+ {
+  "id": "s6",
+  "take": "b",
+  "text": "En de reflextest: zestig seconden. Hoeveel haal jij?",
+  "start": 28.293,
+  "end": 32.8,
+  "dur": 4.507,
+  "words": [
+   {
+    "w": "En",
+    "t": 0.0
+   },
+   {
+    "w": "de",
+    "t": 0.774
+   },
+   {
+    "w": "reflextest:",
+    "t": 0.884
+   },
+   {
+    "w": "zestig",
+    "t": 2.411
+   },
+   {
+    "w": "seconden.",
+    "t": 2.896
+   },
+   {
+    "w": "Hoeveel",
+    "t": 3.447
+   },
+   {
+    "w": "haal",
+    "t": 4.054
+   },
+   {
+    "w": "jij?",
+    "t": 4.227
+   }
+  ]
+ },
+ {
+  "id": "s7",
+  "take": "a",
+  "text": "Een paar minuten per dag, en hoofdstuk zeven zit erin. Schampschot. Niet stampen. Schieten.",
+  "start": 29.28,
+  "end": 35.84,
+  "dur": 6.56,
+  "words": [
+   {
+    "w": "Een",
+    "t": 0.0
+   },
+   {
+    "w": "paar",
+    "t": 0.752
+   },
+   {
+    "w": "minuten",
+    "t": 0.92
+   },
+   {
+    "w": "per",
+    "t": 1.24
+   },
+   {
+    "w": "dag,",
+    "t": 1.42
+   },
+   {
+    "w": "en",
+    "t": 1.813
+   },
+   {
+    "w": "hoofdstuk",
+    "t": 1.952
+   },
+   {
+    "w": "zeven",
+    "t": 2.32
+   },
+   {
+    "w": "zit",
+    "t": 2.6
+   },
+   {
+    "w": "erin.",
+    "t": 2.773
+   },
+   {
+    "w": "Schampschot.",
+    "t": 3.32
+   },
+   {
+    "w": "Niet",
+    "t": 4.784
+   },
+   {
+    "w": "stampen.",
+    "t": 5.093
+   },
+   {
+    "w": "Schieten.",
+    "t": 5.97
+   }
+  ]
+ }
+]

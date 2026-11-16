@@ -22,3 +22,22 @@ python3 build.py
 ```
 
 Benodigd: `pip install piper-tts faster-whisper numpy`, Playwright met Chromium en ffmpeg.
+
+## Versie 2
+
+`schampschot-promo-v2.mp4` is de snellere versie van 39 seconden: harde cuts, inzoomen op de actie, grote woorden in beeld, ondertitels die per woord oplichten en een zelf gesynthetiseerde beat. `schampschot-promo-v2-zonder-muziek.mp4` is dezelfde video zonder beat.
+
+De voice-over komt van ElevenLabs (stem Liam, model `eleven_v3`). De opnames staan in `el/`, dus opnieuw monteren kost geen tegoed.
+
+1. `script2.json` bevat de tekst per scène.
+2. `gen_vo2.py <voice_id> <model> <naam> [seed]` spreekt het hele script in één take in en bewaart de tijd per teken. Dit vraagt een ElevenLabs-sleutel voor `api.elevenlabs.io` in de omgeving.
+3. `vo2.json` kiest per zin de beste take en bevat de woordtijden waarop de montage is getimed.
+4. `record2.js` neemt het spel op, `build2.py` monteert beide video's.
+
+```bash
+node record2.js
+```
+
+```bash
+python3 build2.py
+```
