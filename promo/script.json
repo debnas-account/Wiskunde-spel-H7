@@ -1,0 +1,37 @@
+[
+ {
+  "id": "s1",
+  "cap": "Wiskunde B uit een boek leren, terwijl je concentratie na vijf minuten op is? Dat kan leuker. Dit is Schampschot.",
+  "tts": "Wiskunde bee uit een boek leren, terwijl je concentratie na vijf minuten op is? Dat kan leuker. Dit is Schampschot."
+ },
+ {
+  "id": "s2",
+  "cap": "Elke cirkel is een schild. Een voltreffer ketst af. Alleen een lijn die de cirkel precies raakt, schakelt het uit.",
+  "tts": "Elke cirkel is een schild. Een voltreffer ketst af. Alleen een lijn die de cirkel precies raakt, schakelt het uit."
+ },
+ {
+  "id": "s3",
+  "cap": "Jij rekent die raaklijn uit, drukt op Vuur en ziet meteen of je schot raak is.",
+  "tts": "Jij rekent die raaklijn uit, drukt op vuur, en ziet meteen of je schot raak is."
+ },
+ {
+  "id": "s4",
+  "cap": "Zit je ernaast? Dan gaat je lijn dwars door het schild en krijg je een hint. Lukt het daarna nog niet, dan volgt de hele uitwerking.",
+  "tts": "Zit je ernaast? Dan gaat je lijn dwars door het schild, en krijg je een hint. Lukt het daarna nog niet, dan volgt de hele uitwerking."
+ },
+ {
+  "id": "s5",
+  "cap": "De langste opgave van de paragraaf is opgeknipt in kleine stappen. Elke ronde vallen er tussenstappen weg, tot je op toetsniveau zit.",
+  "tts": "De langste opgave van de paragraaf is opgeknipt in kleine stappen. Elke ronde vallen er tussenstappen weg, tot je op toetsniveau zit."
+ },
+ {
+  "id": "s6",
+  "cap": "Tussendoor test je je reflexen: zestig seconden, zo veel mogelijk goed.",
+  "tts": "Tussendoor test je je reflexen: zestig seconden, zo veel mogelijk goed."
+ },
+ {
+  "id": "s7",
+  "cap": "Zes missies van een paar minuten, steeds nieuwe sommen en een toets-simulatie als eindbaas. Schampschot. Raak voor je toets.",
+  "tts": "Zes missies van een paar minuten, steeds nieuwe sommen, en een toets-simulatie als eindbaas. Schampschot. Raak voor je toets."
+ }
+]

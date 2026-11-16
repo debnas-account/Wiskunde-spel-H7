@@ -1,2 +1,11 @@
 build/
 node_modules/
+promo/frames/
+promo/voices/
+promo/vo/
+promo/*.wav
+promo/video.mp4
+promo/list.txt
+promo/timeline.json
+promo/vo.json
+promo/voices.json
